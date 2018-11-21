@@ -3,12 +3,14 @@ package com.example.android.project0_adndi.ProjectUtilities;
 import android.net.Uri;
 import android.util.Log;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 
 public final class NetworkUtilities {
 
@@ -21,6 +23,8 @@ public final class NetworkUtilities {
     private static final int UPCOMING = 1101;
     private static final int NOW_PLAYING = 1110;
 
+    private static final int URL_CONNECTION_GET_RESPONSE_CODE = 200;
+
     private static final String MOVIE_DB_BASE_URL = "https://api.themoviedb.org/3/";
 
     private static final String SEARCH_URL = "search/movie";
@@ -30,7 +34,7 @@ public final class NetworkUtilities {
     private static final String UPCOMING_URL = "movie/upcoming";
     private static final String NOW_PLAYING_URL = "movie/now_playing";
 
-    private static final String MOVIE_DB_API_KEY = "{API}";
+    private static final String MOVIE_DB_API_KEY = "API_KEY";
 
     private static final String LANGUAGE = "pt-BR";
     private static final String INCLUDE_ADULT = "false";
@@ -92,7 +96,6 @@ public final class NetworkUtilities {
                         .build();
         }
 
-
         try {
             APIUrl = new URL(APIUri.toString());
         } catch (MalformedURLException e) {
@@ -102,17 +105,52 @@ public final class NetworkUtilities {
         Log.v(TAG, "Built URI " + APIUrl);
 
         return APIUrl;
+    }
 
+    private static String readFromStream(InputStream inputStream) throws IOException {
+        StringBuilder output = new StringBuilder();
+        if (inputStream != null) {
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
+            BufferedReader reader = new BufferedReader(inputStreamReader);
+            String line = reader.readLine();
+            while (line != null) {
+                output.append(line);
+                line = reader.readLine();
+            }
+        }
+        return output.toString();
     }
 
     public static String getResponseFromHttpUrl(URL movieUrl) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) movieUrl.openConnection();
-        try {
-            InputStream input = new BufferedInputStream(urlConnection.getInputStream());
-            return String.valueOf(input.read());
-        } finally {
-            urlConnection.disconnect();
+        String jsonResponse = "";
+
+        if (movieUrl == null) {
+            return jsonResponse;
         }
+
+        HttpURLConnection urlConnection = null;
+        InputStream inputStream = null;
+        try {
+            urlConnection = (HttpURLConnection) movieUrl.openConnection();
+            urlConnection.connect();
+            if (urlConnection.getResponseCode() == URL_CONNECTION_GET_RESPONSE_CODE) {
+                inputStream = urlConnection.getInputStream();
+                jsonResponse = readFromStream(inputStream);
+            } else {
+                Log.e(TAG, "Error response code: " + urlConnection.getResponseCode());
+            }
+
+        } catch (IOException e) {
+            Log.e(TAG, " Problem in makeHttpRequest" + e);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            if (inputStream != null) {
+                inputStream.close();
+            }
+        }
+        return jsonResponse;
     }
 
 }
