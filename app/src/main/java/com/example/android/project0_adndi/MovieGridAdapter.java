@@ -46,6 +46,7 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
         viewHolder.mMovieTitleTextView.setText(movieTitle);
         viewHolder.mMovieRankingTextView.setText(movieRanking);
+        viewHolder.mMovieRankingTextView.setTextColor(MovieDBUtilities.getScoreColor(Double.parseDouble(movieRanking)));
 
         ImageView posterImageView = viewHolder.mMoviePosterImageView;
 
