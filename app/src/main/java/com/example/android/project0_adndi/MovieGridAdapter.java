@@ -13,16 +13,17 @@ import android.widget.TextView;
 import com.example.android.project0_adndi.ProjectUtilities.MovieDBUtilities;
 import com.squareup.picasso.Picasso;
 
+import java.util.List;
+
 
 public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.MovieViewHolder> {
 
     final int POSTER_INT = 301;
     private final MovieGridAdapterOnClickHandler mClickHandler;
-    private MovieData[] mMovieList;
+    private List <MovieData> mMovieList;
     private Context context;
 
-    public MovieGridAdapter(MovieData[] movieList, MovieGridAdapterOnClickHandler clickHandler) {
-        mMovieList = movieList;
+    public MovieGridAdapter(MovieGridAdapterOnClickHandler clickHandler) {
         mClickHandler = clickHandler;
     }
 
@@ -40,9 +41,9 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
     @Override
     public void onBindViewHolder(@NonNull MovieGridAdapter.MovieViewHolder viewHolder, int position) {
-        String movieTitle = mMovieList[position].getMovieName();
-        String movieRanking = mMovieList[position].getMovieRanking();
-        String moviePosterURL = MovieDBUtilities.getFinalImageURL(mMovieList[position].getMoviePosterURL(), POSTER_INT);
+        String movieTitle = mMovieList.get( position ).getMovieName();
+        String movieRanking = mMovieList.get( position ).getMovieRanking();
+        String moviePosterURL = MovieDBUtilities.getFinalImageURL( mMovieList.get( position ).getMoviePosterURL(), POSTER_INT );
 
         viewHolder.mMovieTitleTextView.setText(movieTitle);
         viewHolder.mMovieRankingTextView.setText(movieRanking);
@@ -57,11 +58,16 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
     @Override
     public int getItemCount() {
         if (null == mMovieList) return 0;
-        return mMovieList.length;
+        return mMovieList.size();
     }
 
     public interface MovieGridAdapterOnClickHandler {
         void onClick(int movieId);
+    }
+
+    public void setMovieData(List <MovieData> movieList) {
+        mMovieList = movieList;
+        notifyDataSetChanged();
     }
 
     public class MovieViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
@@ -80,7 +86,7 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
         @Override
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
-            int thisMovieId = mMovieList[adapterPosition].getMovieId();
+            int thisMovieId = mMovieList.get( adapterPosition ).getMovieId();
             mClickHandler.onClick(thisMovieId);
         }
     }

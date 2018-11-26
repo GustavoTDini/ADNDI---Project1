@@ -97,7 +97,7 @@ public final class MovieDBUtilities {
             Log.e(TAG, "Problem parsing the news JSON results", e);
         }
 
-
+        Log.v( TAG, "getMovieDataFromJson: " + movieList );
         return movieList;
     }
 
