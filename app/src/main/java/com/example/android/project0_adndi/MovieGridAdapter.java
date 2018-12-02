@@ -1,8 +1,11 @@
 package com.example.android.project0_adndi;
 
 import android.content.Context;
+import android.graphics.PorterDuff;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,6 +20,7 @@ import java.util.List;
 
 
 public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.MovieViewHolder> {
+    final String TAG = "MovieGridAdapter";
 
     final int POSTER_INT = 301;
     private final MovieGridAdapterOnClickHandler mClickHandler;
@@ -40,14 +44,18 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MovieGridAdapter.MovieViewHolder viewHolder, int position) {
+    public void onBindViewHolder(@NonNull MovieViewHolder viewHolder, int position) {
         String movieTitle = mMovieList.get( position ).getMovieName();
         String movieRanking = mMovieList.get( position ).getMovieRanking();
         String moviePosterURL = MovieDBUtilities.getFinalImageURL( mMovieList.get( position ).getMoviePosterURL(), POSTER_INT );
 
         viewHolder.mMovieTitleTextView.setText(movieTitle);
         viewHolder.mMovieRankingTextView.setText(movieRanking);
-        viewHolder.mMovieRankingTextView.setTextColor(MovieDBUtilities.getScoreColor(Double.parseDouble(movieRanking)));
+        int colorInt = MovieDBUtilities.getScoreColor(Double.parseDouble(movieRanking));
+        int colorId = ContextCompat.getColor(context, colorInt);
+        viewHolder.mMovieRankingTextView.getBackground().setColorFilter(colorId, PorterDuff.Mode.SRC_ATOP);
+
+        Log.v(TAG, String.valueOf(colorInt));
 
         ImageView posterImageView = viewHolder.mMoviePosterImageView;
 
@@ -62,7 +70,7 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
     }
 
     public interface MovieGridAdapterOnClickHandler {
-        void onClick(int movieId);
+        void onClick(MovieData movie);
     }
 
     public void setMovieData(List <MovieData> movieList) {
@@ -86,8 +94,8 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
         @Override
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
-            int thisMovieId = mMovieList.get( adapterPosition ).getMovieId();
-            mClickHandler.onClick(thisMovieId);
+            MovieData thisMovie = mMovieList.get(adapterPosition);
+            mClickHandler.onClick(thisMovie);
         }
     }
 }

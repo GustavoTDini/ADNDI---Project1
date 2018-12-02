@@ -10,4 +10,6 @@
     <color name="rankingBelowAverage">#FFC58C</color>
     <color name="rankingBad">#FF8C29</color>
     <color name="rankingTerrible">#FF0000</color>
+    <color name="titleTransparency">#90081c24</color>
+    <color name="backdropTransparency">#66081c24</color>
 </resources>

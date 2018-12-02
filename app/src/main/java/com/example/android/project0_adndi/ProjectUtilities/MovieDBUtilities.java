@@ -1,8 +1,6 @@
 package com.example.android.project0_adndi.ProjectUtilities;
 
-import android.content.res.Resources;
 import android.support.annotation.Nullable;
-import android.support.v4.content.res.ResourcesCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -44,21 +42,20 @@ public final class MovieDBUtilities {
     }
 
     public static int getScoreColor(double movieRankings) {
-        Resources resources = Resources.getSystem();
-        int rankColor = ResourcesCompat.getColor(resources, R.color.rankingTerrible, null);
+        Log.v(TAG, "MovieRanking: " + String.valueOf(movieRankings));
 
-        if (movieRankings > 9)
-            rankColor = ResourcesCompat.getColor(resources, R.color.rankingBest, null);
-        if (movieRankings > 8)
-            rankColor = ResourcesCompat.getColor(resources, R.color.rankingGood, null);
-        if (movieRankings > 6)
-            rankColor = ResourcesCompat.getColor(resources, R.color.rankingAverage, null);
-        if (movieRankings > 4)
-            rankColor = ResourcesCompat.getColor(resources, R.color.rankingBelowAverage, null);
-        if (movieRankings > 2)
-            rankColor = ResourcesCompat.getColor(resources, R.color.rankingBad, null);
+        if (movieRankings >= 9)
+            return R.color.rankingBest;
+        else if (movieRankings >= 8)
+            return R.color.rankingGood;
+        else if (movieRankings >= 6)
+            return R.color.rankingAverage;
+        else if (movieRankings >= 4)
+            return R.color.rankingBelowAverage;
+        else if (movieRankings >= 2)
+            return R.color.rankingBad;
 
-        return rankColor;
+        return R.color.rankingTerrible;
     }
 
     @Nullable
@@ -99,6 +96,27 @@ public final class MovieDBUtilities {
 
         Log.v( TAG, "getMovieDataFromJson: " + movieList );
         return movieList;
+    }
+
+    public static int getPagesFromJson(String JsonString) {
+
+        int pages = 1;
+
+        if (TextUtils.isEmpty(JsonString)) {
+            return pages;
+        }
+
+        try {
+
+            JSONObject root = new JSONObject(JsonString);
+
+            pages = root.getInt("page");
+
+        } catch (JSONException e) {
+            Log.e(TAG, "Problem parsing the news JSON results", e);
+        }
+
+        return pages;
     }
 
 }

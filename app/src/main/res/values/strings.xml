@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">Project0-ADNDI</string>
+    <string name="app_name">MovieDB</string>
+    <string name="movie_poster_description">Movie Poster</string>
+    <string name="menu_popular">Popular</string>
+    <string name="menu_top_rated">Top Rated</string>
+    <string name="menu_upcoming">Upcoming</string>
+    <string name="menu_now_playing">Now Playing</string>
+    <string name="movie_backdrop_image">Movie Backdrop Image</string>
 </resources>

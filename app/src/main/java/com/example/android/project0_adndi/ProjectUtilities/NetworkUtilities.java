@@ -38,12 +38,13 @@ public final class NetworkUtilities {
     private static final String INCLUDE_ADULT = "false";
 
     private final static String QUERY_PARAM = "query";
+    private final static String PAGE_PARAM = "page";
     private final static String API_PARAM = "api_key";
     private final static String LANGUAGE_PARAM = "language";
     private final static String ADULT_PARAM = "include_adult";
 
 
-    public static URL buildMovieSearchURL(String type, String query) {
+    public static URL buildMovieSearchURL(String type, String query, String page) {
         Uri APIUri;
 
         URL APIUrl = null;
@@ -51,6 +52,7 @@ public final class NetworkUtilities {
         switch (type) {
             case SEARCH:
                 APIUri = Uri.parse(MOVIE_DB_BASE_URL + SEARCH_URL).buildUpon()
+                        .appendQueryParameter(PAGE_PARAM, page)
                         .appendQueryParameter(API_PARAM, MOVIE_DB_API_KEY)
                         .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE)
                         .appendQueryParameter(QUERY_PARAM, query)
@@ -59,30 +61,35 @@ public final class NetworkUtilities {
                 break;
             case POPULAR:
                 APIUri = Uri.parse(MOVIE_DB_BASE_URL + POPULAR_URL).buildUpon()
+                        .appendQueryParameter(PAGE_PARAM, page)
                         .appendQueryParameter(API_PARAM, MOVIE_DB_API_KEY)
                         .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE)
                         .build();
                 break;
             case TOP_RATED:
                 APIUri = Uri.parse(MOVIE_DB_BASE_URL + TOP_RATED_URL).buildUpon()
+                        .appendQueryParameter(PAGE_PARAM, page)
                         .appendQueryParameter(API_PARAM, MOVIE_DB_API_KEY)
                         .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE)
                         .build();
                 break;
             case UPCOMING:
                 APIUri = Uri.parse(MOVIE_DB_BASE_URL + UPCOMING_URL).buildUpon()
+                        .appendQueryParameter(PAGE_PARAM, page)
                         .appendQueryParameter(API_PARAM, MOVIE_DB_API_KEY)
                         .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE)
                         .build();
                 break;
             case NOW_PLAYING:
                 APIUri = Uri.parse(MOVIE_DB_BASE_URL + NOW_PLAYING_URL).buildUpon()
+                        .appendQueryParameter(PAGE_PARAM, page)
                         .appendQueryParameter(API_PARAM, MOVIE_DB_API_KEY)
                         .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE)
                         .build();
                 break;
             default:
                 APIUri = Uri.parse(MOVIE_DB_BASE_URL + POPULAR_URL).buildUpon()
+                        .appendQueryParameter(PAGE_PARAM, page)
                         .appendQueryParameter(API_PARAM, MOVIE_DB_API_KEY)
                         .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE)
                         .build();

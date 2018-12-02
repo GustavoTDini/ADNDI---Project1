@@ -93,7 +93,7 @@ public class MovieData implements Parcelable {
     @Override
     public String toString() {
         return "MovieData{" +
-                "mMovieName='" + mMovieId + '\'' +
+                "mMovieId='" + mMovieId + '\'' +
                 "mMovieName='" + mMovieName + '\'' +
                 ", mMovieRanking='" + mMovieRanking + '\'' +
                 ", mMoviePosterURL='" + mMoviePosterURL + '\'' +
