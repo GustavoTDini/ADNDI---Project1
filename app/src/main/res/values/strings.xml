@@ -6,4 +6,7 @@
     <string name="menu_upcoming">Upcoming</string>
     <string name="menu_now_playing">Now Playing</string>
     <string name="movie_backdrop_image">Movie Backdrop Image</string>
+    <string name="details_launch_date">Launch Date</string>
+    <string name="details_movie_overview">Movie Overview</string>
+    <string name="menu_search_a_movie">Search a Movie</string>
 </resources>

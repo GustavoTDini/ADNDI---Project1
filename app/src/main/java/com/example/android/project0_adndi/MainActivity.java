@@ -10,11 +10,13 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -34,17 +36,25 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
     private static final String UPCOMING = "1101";
     private static final String NOW_PLAYING = "1110";
 
+    private static final String PAGES = "page";
+    private static final String TOTAL_PAGES = "total_pages";
+
 
     private static final String MOVIE_PARCEL = "movieParcel";
     private static final int LANDSCAPE_SPAM = 3;
     private static final int PORTRAIT_SPAM = 2;
-    int JsonPAges = 1;
+    int JsonPages = 1;
+    int totalPages = 2;
     String query = "";
+
+    String selectedType = POPULAR;
 
     private MovieGridAdapter mMovieGridAdapter;
     private RecyclerView mRecyclerView;
     private TextView mErrorMessageDisplay;
     private ProgressBar mProgressBar;
+    private Button mAddPagesButton;
+    private Button mDecreasePagesButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +68,23 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
 
         mProgressBar = findViewById(R.id.pb_loading_indicator);
 
+        mAddPagesButton = findViewById(R.id.bt_page_up);
+
+        mDecreasePagesButton = findViewById(R.id.bt_page_down);
+
+        mAddPagesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addDecreasePages(true);
+            }
+        });
+
+        mDecreasePagesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addDecreasePages(false);
+            }
+        });
 
         int orientation = getResources().getConfiguration().orientation;
 
@@ -75,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
 
         mRecyclerView.setAdapter(mMovieGridAdapter);
 
-        testConnectionAndStartAsync(POPULAR);
+        testConnectionAndStartAsync(selectedType);
 
     }
 
@@ -93,6 +120,25 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_activity_menu, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.sv_search_movie);
+
+        SearchView searchView = (SearchView) searchItem.getActionView();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String newText) {
+                doMySearch(newText);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                doMySearch(newText);
+                return false;
+            }
+        });
+
         return true;
     }
 
@@ -134,18 +180,40 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         assert connMgr != null;
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        Log.v(TAG, "NetworkInfo " + networkInfo);
         if (networkInfo != null && networkInfo.isConnected()) {
-            String stringPages = String.valueOf(JsonPAges);
-            if (type.equals(SEARCH)) {
-                new AsyncMovieTask().execute(type, query, stringPages);
+            String stringPages = String.valueOf(JsonPages);
+            selectedType = type;
+            if (selectedType.equals(SEARCH)) {
+                new AsyncMovieTask().execute(selectedType, query, stringPages);
             } else {
-                new AsyncMovieTask().execute(type, null, stringPages);
+                new AsyncMovieTask().execute(selectedType, null, stringPages);
+            }
+            if (JsonPages == 1) {
+                mDecreasePagesButton.setVisibility(View.GONE);
+            }
+            if (JsonPages == totalPages) {
+                mAddPagesButton.setVisibility(View.GONE);
             }
 
         } else {
             showViews(true, "There´s no Internet Connection!!");
         }
+    }
+
+    private void doMySearch(String searchQuery) {
+        query = searchQuery;
+        testConnectionAndStartAsync(SEARCH);
+    }
+
+    private void addDecreasePages(boolean add) {
+        mAddPagesButton.setVisibility(View.VISIBLE);
+        mDecreasePagesButton.setVisibility(View.VISIBLE);
+        if (add) {
+            if (JsonPages < totalPages) JsonPages++;
+        } else {
+            if (JsonPages != 1) JsonPages--;
+        }
+        testConnectionAndStartAsync(selectedType);
     }
 
     public class AsyncMovieTask extends AsyncTask<String, Void, List<MovieData>> {
@@ -178,7 +246,8 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
 
             try {
                 String movieJson = NetworkUtilities.getResponseFromHttpUrl(movieUrl);
-                asyncPages = MovieDBUtilities.getPagesFromJson(movieJson);
+                asyncPages = MovieDBUtilities.getPagesAndTotalFromJson(movieJson, PAGES);
+                totalPages = MovieDBUtilities.getPagesAndTotalFromJson(movieJson, TOTAL_PAGES);
                 return MovieDBUtilities.getMovieDataFromJson(movieJson);
 
             } catch (Exception e) {
@@ -191,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         protected void onPostExecute(List<MovieData> movieList) {
             if (movieList == null || movieList.size() > 0) {
                 mMovieGridAdapter.setMovieData(movieList);
-                JsonPAges = asyncPages;
+                JsonPages = asyncPages;
                 mProgressBar.setVisibility(View.INVISIBLE);
                 showViews(false, null);
                 Log.d("AsyncMovie", "onPostExecute: " + movieList);
@@ -200,6 +269,4 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
             }
         }
     }
-
-
 }

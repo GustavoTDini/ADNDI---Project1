@@ -32,9 +32,9 @@ public final class NetworkUtilities {
     private static final String UPCOMING_URL = "movie/upcoming";
     private static final String NOW_PLAYING_URL = "movie/now_playing";
 
-    private static final String MOVIE_DB_API_KEY = "16ba0553e91a0ef25bbfe7b244961de8";
+    private static final String MOVIE_DB_API_KEY = "API_KEY";
 
-    private static final String LANGUAGE = "pt-BR";
+    private static final String LANGUAGE = "en";
     private static final String INCLUDE_ADULT = "false";
 
     private final static String QUERY_PARAM = "query";

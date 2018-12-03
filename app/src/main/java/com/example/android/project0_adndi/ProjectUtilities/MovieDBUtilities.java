@@ -28,9 +28,9 @@ public final class MovieDBUtilities {
 
         final String BASE_URL = "http://image.tmdb.org/t/p/";
 
-        final String POSTER_SIZE = "w185";
+        final String POSTER_SIZE = "w300";
 
-        final String BACKDROP_SIZE = "w300";
+        final String BACKDROP_SIZE = "w1280";
 
         if (poster_Backdrop == POSTER_INT) {
             finalImageUrl = BASE_URL + POSTER_SIZE + imageUrl;
@@ -98,7 +98,7 @@ public final class MovieDBUtilities {
         return movieList;
     }
 
-    public static int getPagesFromJson(String JsonString) {
+    public static int getPagesAndTotalFromJson(String JsonString, String pagesOrTotal) {
 
         int pages = 1;
 
@@ -110,7 +110,7 @@ public final class MovieDBUtilities {
 
             JSONObject root = new JSONObject(JsonString);
 
-            pages = root.getInt("page");
+            pages = root.getInt(pagesOrTotal);
 
         } catch (JSONException e) {
             Log.e(TAG, "Problem parsing the news JSON results", e);
