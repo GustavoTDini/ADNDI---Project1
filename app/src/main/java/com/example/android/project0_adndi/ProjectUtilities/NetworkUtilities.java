@@ -14,41 +14,58 @@ import java.nio.charset.Charset;
 
 public final class NetworkUtilities {
 
+    //  TAG desta Classe - para os erros
     private static final String TAG = NetworkUtilities.class.getSimpleName();
 
+    // Strings com cada codigo dos diferentes tipos de queries
     private static final String SEARCH = "1000";
     private static final String POPULAR = "1010";
     private static final String TOP_RATED = "1100";
     private static final String UPCOMING = "1101";
     private static final String NOW_PLAYING = "1110";
 
+    // Codigo de resposta ok da conexão
     private static final int URL_CONNECTION_GET_RESPONSE_CODE = 200;
 
+    // Base da URL do MovieDB
     private static final String MOVIE_DB_BASE_URL = "http://api.themoviedb.org/3/";
 
+    // Endereços de cada query do MovieDB URL
     private static final String SEARCH_URL = "search/movie";
     private static final String POPULAR_URL = "movie/popular";
     private static final String TOP_RATED_URL = "movie/top_rated";
     private static final String UPCOMING_URL = "movie/upcoming";
     private static final String NOW_PLAYING_URL = "movie/now_playing";
 
-    private static final String MOVIE_DB_API_KEY = "API_KEY";
+    // Chave da API
+    private static final String MOVIE_DB_API_KEY = "API KEY";
 
+    // COdigo da Lingua definida
     private static final String LANGUAGE = "en";
+
+    // String para não incluir conteudos adultos
     private static final String INCLUDE_ADULT = "false";
 
+    // os Varios parametros da Query do MovieDB
     private final static String QUERY_PARAM = "query";
     private final static String PAGE_PARAM = "page";
     private final static String API_PARAM = "api_key";
     private final static String LANGUAGE_PARAM = "language";
     private final static String ADULT_PARAM = "include_adult";
 
-
+    /**
+     * buildMovieSearchURL é chamado para criarmos a URL do MovieDB, de acordo com as opções do Usuario
+     *
+     * @param type  o tipo de busca que iremos iniciar com a MOVIEDB
+     * @param query se o query for tipo search, este é o string a ser buscado
+     * @param page  a pagina em que se encontra a query
+     * @return a URL com os valores selecionados
+     */
     public static URL buildMovieSearchURL(String type, String query, String page) {
         Uri APIUri;
-
         URL APIUrl = null;
 
+        // utilizado um switch para os varios métodos de busca
         switch (type) {
             case SEARCH:
                 APIUri = Uri.parse(MOVIE_DB_BASE_URL + SEARCH_URL).buildUpon()
@@ -95,17 +112,22 @@ public final class NetworkUtilities {
                         .build();
         }
 
+        // Verifica se o URL é valido
         try {
             APIUrl = new URL(APIUri.toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
 
-        Log.v(TAG, "Built URI " + APIUrl);
-
         return APIUrl;
     }
 
+    /**
+     * readFromStream é utilizado para lermos o fluxo de informações da Conexão e criarmos o JSON
+     *
+     * @param inputStream fluxo de informação da conexão aberta
+     * @return a String com o JSON retornado
+     */
     private static String readFromStream(InputStream inputStream) throws IOException {
         StringBuilder output = new StringBuilder();
         if (inputStream != null) {
@@ -120,6 +142,14 @@ public final class NetworkUtilities {
         return output.toString();
     }
 
+    /**
+     * getResponseFromHttpUrl é utilizado para abrirmos uma conexão com o respectivo URL e retornar
+     * o JSON com as informações
+     *
+     * @param movieUrl URL criado pelas opções do usuario
+     *
+     * @return a String com o JSON retornado
+     */
     public static String getResponseFromHttpUrl(URL movieUrl) throws IOException {
         String jsonResponse = "";
 

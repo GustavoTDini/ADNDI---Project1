@@ -16,20 +16,34 @@ import java.util.List;
 
 public final class MovieDBUtilities {
 
-    public static final String TAG = "MovieDBUtilities";
+    //  TAG desta Classe - para os erros
+    private static final String TAG = "MovieDBUtilities";
 
+
+    /**
+     * getFinalImageURL é utilizado para criar o URL da imagem do poster ou fundo
+     *
+     * @param imageUrl        parte da URL recebido pela MOVIEDB JSON
+     * @param poster_Backdrop int que define se criremos uma URL do poster ou do Fundo
+     * @return a String com a URL da Imagem
+     */
     public static String getFinalImageURL(String imageUrl, int poster_Backdrop) {
 
         String finalImageUrl = "";
 
+        // Código do Poster
         final int POSTER_INT = 301;
 
+        // Código do BackDrop
         final int BACKDROP_INT = 302;
 
+        // URL base da image
         final String BASE_URL = "http://image.tmdb.org/t/p/";
 
+        // tamanho do poster
         final String POSTER_SIZE = "w300";
 
+        // tamanho do BackDrop
         final String BACKDROP_SIZE = "w1280";
 
         if (poster_Backdrop == POSTER_INT) {
@@ -41,8 +55,13 @@ public final class MovieDBUtilities {
         return finalImageUrl;
     }
 
+    /**
+     * getScoreColor define a cor da View da pontuação do Filme
+     *
+     * @param movieRankings Nota do Filme
+     * @return int com o valor da cor
+     */
     public static int getScoreColor(double movieRankings) {
-        Log.v(TAG, "MovieRanking: " + String.valueOf(movieRankings));
 
         if (movieRankings >= 9)
             return R.color.rankingBest;
@@ -58,6 +77,14 @@ public final class MovieDBUtilities {
         return R.color.rankingTerrible;
     }
 
+    /**
+     * getMovieDataFromJson decodifica o filme do JSON em uma lista de MovieData, de modo
+     * que podemos recuperar esses dados em outras partes do App
+     *
+     * @param JsonString JSOn com os dados brutos dos filmes
+     *
+     * @return List de MovieData com os filmes que estavam na JSON
+     */
     @Nullable
     public static List<MovieData> getMovieDataFromJson(String JsonString) {
 
@@ -98,6 +125,16 @@ public final class MovieDBUtilities {
         return movieList;
     }
 
+    /**
+     * getPagesAndTotalFromJson retorna ou o total de paginas ou a pagina atual da lista de filmes
+     * do JSON
+     *
+     * @param JsonString JSOn com os dados brutos dos filmes
+     *
+     * @param pagesOrTotal string que pode ser 'page' ou 'total_pages', para retornarmos uma ou outra informação
+     *
+     * @return int com o numero de paginas ou pagina atual a depender de pagesOrTotal
+     */
     public static int getPagesAndTotalFromJson(String JsonString, String pagesOrTotal) {
 
         int pages = 1;
@@ -107,11 +144,8 @@ public final class MovieDBUtilities {
         }
 
         try {
-
             JSONObject root = new JSONObject(JsonString);
-
             pages = root.getInt(pagesOrTotal);
-
         } catch (JSONException e) {
             Log.e(TAG, "Problem parsing the news JSON results", e);
         }

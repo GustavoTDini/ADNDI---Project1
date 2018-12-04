@@ -2,9 +2,13 @@ package com.example.android.project0_adndi;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 public class MovieData implements Parcelable {
 
+    /**
+     * Método creator do parcel para aproveitarmos as funcionalidades da classe
+     */
     public static final Creator<MovieData> CREATOR = new Creator<MovieData>() {
         @Override
         public MovieData createFromParcel(Parcel in) {
@@ -16,6 +20,7 @@ public class MovieData implements Parcelable {
             return new MovieData[size];
         }
     };
+
     private int mMovieId;
     private String mMovieName;
     private String mMovieRanking;
@@ -24,6 +29,9 @@ public class MovieData implements Parcelable {
     private String mMovieBackdropURL;
     private String mMovieOverView;
 
+    /**
+     * Construtor da Classe
+     */
     public MovieData(int movieId, String movieName, String movieRanking, String moviePosterURL, String movieLaunchDate, String movieBackdropURL, String movieOverView) {
         this.mMovieId = movieId;
         this.mMovieName = movieName;
@@ -34,6 +42,9 @@ public class MovieData implements Parcelable {
         this.mMovieOverView = movieOverView;
     }
 
+    /**
+     * Construtor da Classe utilizando Parcel
+     */
     private MovieData(Parcel in) {
         mMovieId = in.readInt();
         mMovieName = in.readString();
@@ -48,27 +59,27 @@ public class MovieData implements Parcelable {
         return mMovieId;
     }
 
-    public String getMovieName() {
+    String getMovieName() {
         return mMovieName;
     }
 
-    public String getMovieRanking() {
+    String getMovieRanking() {
         return mMovieRanking;
     }
 
-    public String getMoviePosterURL() {
+    String getMoviePosterURL() {
         return mMoviePosterURL;
     }
 
-    public String getMovieLaunchDate() {
+    String getMovieLaunchDate() {
         return mMovieLaunchDate;
     }
 
-    public String getMovieBackdropURL() {
+    String getMovieBackdropURL() {
         return mMovieBackdropURL;
     }
 
-    public String getMovieOverView() {
+    String getMovieOverView() {
         return mMovieOverView;
     }
 
@@ -90,6 +101,12 @@ public class MovieData implements Parcelable {
 
     }
 
+    /**
+     * Metodo toString da classe
+     *
+     * @return string com a representação do MovieData
+     */
+    @NonNull
     @Override
     public String toString() {
         return "MovieData{" +

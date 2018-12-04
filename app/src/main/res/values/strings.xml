@@ -9,4 +9,6 @@
     <string name="details_launch_date">Launch Date</string>
     <string name="details_movie_overview">Movie Overview</string>
     <string name="menu_search_a_movie">Search a Movie</string>
+    <string name="button_minus">-</string>
+    <string name="button_add">+</string>
 </resources>
