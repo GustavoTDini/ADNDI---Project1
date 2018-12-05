@@ -16,8 +16,12 @@ import java.util.List;
 
 public final class MovieDBUtilities {
 
+    // Código do Poster
+    public static final int POSTER_INT = 301;
+    // Código do BackDrop
+    public static final int BACKDROP_INT = 302;
     //  TAG desta Classe - para os erros
-    private static final String TAG = "MovieDBUtilities";
+    private static final String LOG_TAG = MovieDBUtilities.class.getSimpleName();
 
 
     /**
@@ -30,12 +34,6 @@ public final class MovieDBUtilities {
     public static String getFinalImageURL(String imageUrl, int poster_Backdrop) {
 
         String finalImageUrl = "";
-
-        // Código do Poster
-        final int POSTER_INT = 301;
-
-        // Código do BackDrop
-        final int BACKDROP_INT = 302;
 
         // URL base da image
         final String BASE_URL = "http://image.tmdb.org/t/p/";
@@ -118,10 +116,9 @@ public final class MovieDBUtilities {
             }
 
         } catch (JSONException e) {
-            Log.e(TAG, "Problem parsing the news JSON results", e);
+            Log.e( LOG_TAG, "Problem parsing the news JSON results", e );
         }
 
-        Log.v( TAG, "getMovieDataFromJson: " + movieList );
         return movieList;
     }
 
@@ -147,7 +144,7 @@ public final class MovieDBUtilities {
             JSONObject root = new JSONObject(JsonString);
             pages = root.getInt(pagesOrTotal);
         } catch (JSONException e) {
-            Log.e(TAG, "Problem parsing the news JSON results", e);
+            Log.e( LOG_TAG, "Problem parsing the news JSON results", e );
         }
 
         return pages;

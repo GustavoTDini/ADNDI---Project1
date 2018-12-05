@@ -11,16 +11,9 @@ import android.widget.TextView;
 import com.example.android.project0_adndi.ProjectUtilities.MovieDBUtilities;
 import com.squareup.picasso.Picasso;
 
+import org.parceler.Parcels;
+
 public class DetailsActivity extends AppCompatActivity {
-
-    // String que conecta a MainActivity com este Intent atraves de PutExtra
-    private static final String MOVIE_PARCEL = "movieParcel";
-
-    // Código do Poster
-    final int POSTER_INT = 301;
-
-    // Código do BackDrop
-    final int BACKDROP_INT = 302;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,15 +30,15 @@ public class DetailsActivity extends AppCompatActivity {
         Intent intentThatStartedThisActivity = getIntent();
 
         //Verifica se o Intent tem o MOVIE_PARCEL extra
-        if (intentThatStartedThisActivity.hasExtra(MOVIE_PARCEL)) {
-            MovieData movie = intentThatStartedThisActivity.getParcelableExtra(MOVIE_PARCEL);
+        if (intentThatStartedThisActivity.hasExtra( MovieData.MOVIE_PARCEL )) {
+            MovieData movie = Parcels.unwrap( getIntent().getParcelableExtra( MovieData.MOVIE_PARCEL ) );
             //resgata os dados sobre o filme do MovieData movie
             String movieTitle = movie.getMovieName();
             String movieDate = movie.getMovieLaunchDate();
             String movieOverview = movie.getMovieOverView();
             String movieRanking = movie.getMovieRanking();
-            String moviePosterURL = MovieDBUtilities.getFinalImageURL(movie.getMoviePosterURL(), POSTER_INT);
-            String movieBackground = MovieDBUtilities.getFinalImageURL(movie.getMovieBackdropURL(), BACKDROP_INT);
+            String moviePosterURL = MovieDBUtilities.getFinalImageURL( movie.getMoviePosterURL(), MovieDBUtilities.POSTER_INT );
+            String movieBackground = MovieDBUtilities.getFinalImageURL( movie.getMovieBackdropURL(), MovieDBUtilities.BACKDROP_INT );
 
             // Define as View com os Valores do MovieData movie
             Picasso.with(getBaseContext()).load(moviePosterURL).into(mMovieDetailPosterImageView);

@@ -9,6 +9,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        it.buildConfigField("String", "MOVIE_DB_API_KEY", MOVIE_DB_API_KEY)
     }
     buildTypes {
         release {
@@ -20,13 +21,17 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation 'com.android.support:recyclerview-v7:28.0.0'
     implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'org.parceler:parceler-api:1.1.11'
 
+    annotationProcessor 'org.parceler:parceler:1.1.11'
 
     testImplementation 'junit:junit:4.12'
+
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }

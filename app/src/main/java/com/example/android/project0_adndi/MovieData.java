@@ -21,6 +21,9 @@ public class MovieData implements Parcelable {
         }
     };
 
+    // String que conecta a MainActivity com este Intent atraves de PutExtra
+    static final String MOVIE_PARCEL = "movieParcel";
+
     private int mMovieId;
     private String mMovieName;
     private String mMovieRanking;
@@ -53,6 +56,12 @@ public class MovieData implements Parcelable {
         mMovieLaunchDate = in.readString();
         mMovieBackdropURL = in.readString();
         mMovieOverView = in.readString();
+    }
+
+    /**
+     * Construtor da Classe vazio para Parceler
+     */
+    private MovieData() {
     }
 
     public int getMovieId() {

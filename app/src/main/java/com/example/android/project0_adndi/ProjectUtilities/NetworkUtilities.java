@@ -3,6 +3,8 @@ package com.example.android.project0_adndi.ProjectUtilities;
 import android.net.Uri;
 import android.util.Log;
 
+import com.example.android.project0_adndi.BuildConfig;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,11 +20,11 @@ public final class NetworkUtilities {
     private static final String TAG = NetworkUtilities.class.getSimpleName();
 
     // Strings com cada codigo dos diferentes tipos de queries
-    private static final String SEARCH = "1000";
-    private static final String POPULAR = "1010";
-    private static final String TOP_RATED = "1100";
-    private static final String UPCOMING = "1101";
-    private static final String NOW_PLAYING = "1110";
+    public static final String SEARCH = "1000";
+    public static final String POPULAR = "1010";
+    public static final String TOP_RATED = "1100";
+    public static final String UPCOMING = "1101";
+    public static final String NOW_PLAYING = "1110";
 
     // Codigo de resposta ok da conexão
     private static final int URL_CONNECTION_GET_RESPONSE_CODE = 200;
@@ -38,7 +40,7 @@ public final class NetworkUtilities {
     private static final String NOW_PLAYING_URL = "movie/now_playing";
 
     // Chave da API
-    private static final String MOVIE_DB_API_KEY = "API KEY";
+    private static final String MOVIE_DB_API_KEY = BuildConfig.MOVIE_DB_API_KEY;
 
     // COdigo da Lingua definida
     private static final String LANGUAGE = "en";

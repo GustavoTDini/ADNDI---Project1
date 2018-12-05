@@ -22,7 +22,7 @@ import java.util.List;
 public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.MovieViewHolder> {
 
     //  TAG desta Classe - para os erros
-    private final String TAG = "MovieGridAdapter";
+    private final String TAG = MovieGridAdapter.class.getSimpleName();
 
     // ClickHandler para definirmos a interface
     private final MovieGridAdapterOnClickHandler mClickHandler;
@@ -102,7 +102,7 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
      *
      * @param movieList lista que utilizaremos
      */
-    public void setMovieData(List <MovieData> movieList) {
+    void setMovieData(List <MovieData> movieList) {
         mMovieList = movieList;
         notifyDataSetChanged();
     }
