@@ -30,33 +30,33 @@
                 android:layout_marginTop="16dp"
                 android:orientation="horizontal">
 
-                <Button
-                    android:text="@string/button_minus"
-                    android:id="@+id/bt_page_down"
-                    style="?android:attr/buttonBarStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@color/colorPrimaryDark"
-                    android:visibility="invisible"
-                    android:textAlignment="center"
-                    android:textColor="@color/colorAccent"
-                    android:textSize="30sp"
-                    android:textStyle="bold" />
+                <!--<Button-->
+                <!--android:text="@string/button_minus"-->
+                <!--android:id="@+id/bt_page_down"-->
+                <!--style="?android:attr/buttonBarStyle"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:layout_weight="1"-->
+                <!--android:background="@color/colorPrimaryDark"-->
+                <!--android:visibility="invisible"-->
+                <!--android:textAlignment="center"-->
+                <!--android:textColor="@color/colorAccent"-->
+                <!--android:textSize="30sp"-->
+                <!--android:textStyle="bold" />-->
 
-                <Button
-                    android:text="@string/button_add"
-                    android:id="@+id/bt_page_up"
-                    style="?android:attr/buttonBarStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@color/colorPrimaryDark"
-                    android:visibility="invisible"
-                    android:textAlignment="center"
-                    android:textColor="@color/colorAccent"
-                    android:textSize="30sp"
-                    android:textStyle="bold" />
+                <!--<Button-->
+                <!--android:text="@string/button_add"-->
+                <!--android:id="@+id/bt_page_up"-->
+                <!--style="?android:attr/buttonBarStyle"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:layout_weight="1"-->
+                <!--android:background="@color/colorPrimaryDark"-->
+                <!--android:visibility="invisible"-->
+                <!--android:textAlignment="center"-->
+                <!--android:textColor="@color/colorAccent"-->
+                <!--android:textSize="30sp"-->
+                <!--android:textStyle="bold" />-->
 
             </LinearLayout>
 

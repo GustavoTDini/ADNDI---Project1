@@ -1,5 +1,6 @@
 package com.example.android.project0_adndi;
 
+import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -15,16 +16,19 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.example.android.project0_adndi.DataUtilities.AppDatabase;
+import com.example.android.project0_adndi.DataUtilities.MovieData;
+import com.example.android.project0_adndi.DataUtilities.UrlMovieList;
 import com.example.android.project0_adndi.ProjectUtilities.MovieDBUtilities;
 import com.example.android.project0_adndi.ProjectUtilities.NetworkUtilities;
 
 import org.parceler.Parcels;
 
+import java.net.URL;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements MovieGridAdapter.MovieGridAdapterOnClickHandler, AsyncTaskDelegate {
@@ -37,15 +41,15 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
 
     // int com o total de View do grid em Modo retrato
     private static final int PORTRAIT_SPAM = 2;
-    // String utilizada em getPagesAndTotalFromJson para retornarmos as paginas
-    private static final String PAGES = "page";
-    // String utilizada em getPagesAndTotalFromJson para retornarmos as paginas totais
-    private static final String TOTAL_PAGES = "total_pages";
     // int com o numero de paginas atual
     int jsonPages = 1;
 
     // int com o numero de paginas totais
     int totalPages = 2;
+
+    // Iniciação da DataBase
+    private static AppDatabase mDb;
+    URL currentUrl;
 
     // string com o query para a SEARCH
     String query = "";
@@ -55,8 +59,8 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
     private RecyclerView mRecyclerView;
     private TextView mErrorMessageDisplay;
     private ProgressBar mProgressBar;
-    private Button mAddPagesButton;
-    private Button mDecreasePagesButton;
+    //    private Button mAddPagesButton;
+//    private Button mDecreasePagesButton;
     private ScrollView mScrollView;
 
     @Override
@@ -75,29 +79,30 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         // definição pelo findViewById do ProgressBar que indicará atividade de rede
         mProgressBar = findViewById(R.id.pb_loading_indicator);
 
-        // definição pelo findViewById do Button que aumenta 1 pagina
-        mAddPagesButton = findViewById(R.id.bt_page_up);
-
-        // definição pelo findViewById do Button que diminui 1 pagina
-        mDecreasePagesButton = findViewById(R.id.bt_page_down);
+//        // definição pelo findViewById do Button que aumenta 1 pagina
+//        mAddPagesButton = findViewById(R.id.bt_page_up);
+//
+//        // definição pelo findViewById do Button que diminui 1 pagina
+//        mDecreasePagesButton = findViewById(R.id.bt_page_down);
 
         mScrollView = findViewById( R.id.sv_main_activity );
 
-        // ClickListener de mAddPagesButton utiliza o metodo addDecreasePages
-        mAddPagesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addDecreasePages(true);
-            }
-        });
+//        // ClickListener de mAddPagesButton utiliza o metodo addDecreasePages
+//        mAddPagesButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                addDecreasePages(true);
+//            }
+//        });
+//
+//        // ClickListener de mDecreasePagesButton utiliza o metodo addDecreasePages
+//        mDecreasePagesButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                addDecreasePages(false);
+//            }
+//        });
 
-        // ClickListener de mDecreasePagesButton utiliza o metodo addDecreasePages
-        mDecreasePagesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addDecreasePages(false);
-            }
-        });
 
         // Recebimento da orientação e definição do gridSpam para a correta exibição da View
         int orientation = getResources().getConfiguration().orientation;
@@ -225,21 +230,17 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
             String stringPages = String.valueOf( jsonPages );
             selectedType = type;
             if (selectedType.equals( NetworkUtilities.SEARCH )) {
-                new AsyncMovieTask( new AsyncTaskDelegate() {
-                    @Override
-                    public void processFinish(String output) {
-                        finishAsyncProcess( output );
-                    }
-                } ).execute( selectedType, query, stringPages );
+                currentUrl = NetworkUtilities.buildMovieSearchURL(selectedType, query, stringPages);
             } else {
-                new AsyncMovieTask( new AsyncTaskDelegate() {
-                    @Override
-                    public void processFinish(String output) {
-                        finishAsyncProcess( output );
-                    }
-                } ).execute( selectedType, null, stringPages );
+                currentUrl = NetworkUtilities.buildMovieSearchURL(selectedType, null, stringPages);
             }
-            showhideButtons( jsonPages );
+            new AsyncMovieTask(new AsyncTaskDelegate() {
+                @Override
+                public void processFinish(String output) {
+                    finishAsyncProcess(output);
+                }
+            }).execute(currentUrl);
+//            showhideButtons( jsonPages );
         } else {
             showViews(true, "There´s no Internet Connection!!");
         }
@@ -270,44 +271,74 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         testConnectionAndStartAsync(selectedType);
     }
 
-    /**
-     * showhideButtons Método para definir a visibilidade dos botões de controle de paginas
-     */
-    private void showhideButtons(int pages) {
-        mAddPagesButton.setVisibility( View.VISIBLE );
-        mDecreasePagesButton.setVisibility( View.VISIBLE );
-        if (pages == 1) {
-            mDecreasePagesButton.setVisibility(View.GONE);
-        }
-        if (pages == totalPages) {
-            mAddPagesButton.setVisibility(View.GONE);
-        }
-    }
+//    /**
+//     * showhideButtons Método para definir a visibilidade dos botões de controle de paginas
+//     */
+//    private void showhideButtons(int pages) {
+//        mAddPagesButton.setVisibility( View.VISIBLE );
+//        mDecreasePagesButton.setVisibility( View.VISIBLE );
+//        if (pages == 1) {
+//            mDecreasePagesButton.setVisibility(View.GONE);
+//        }
+//        if (pages == totalPages) {
+//            mAddPagesButton.setVisibility(View.GONE);
+//        }
+//    }
 
     @Override
     public void processFinish(String output) {
         finishAsyncProcess( output );
     }
 
-    public void finishAsyncProcess(String jsonResponse) {
-        // retorna apenas se o movieList for válido
+    public void finishAsyncProcess(final String jsonResponse) {
+
+
+        mDb = AppDatabase.getInstance(getApplicationContext());
+
+        final String urlString = currentUrl.toString();
+
+        // retorna apenas se a resposta for válido
         if (jsonResponse != null) {
-            List <MovieData> movieList = MovieDBUtilities.getMovieDataFromJson( jsonResponse );
-            jsonPages = MovieDBUtilities.getPagesAndTotalFromJson( jsonResponse, PAGES );
-            totalPages = MovieDBUtilities.getPagesAndTotalFromJson( jsonResponse, TOTAL_PAGES );
-            if (movieList != null) {
-                if (movieList.size() > 0) {
-                    // inicialização dos varios views a serem utilizados
-                    MovieGridAdapter mMovieGridAdapter = new MovieGridAdapter( MainActivity.this );
-                    mMovieGridAdapter.setMovieData( movieList );
-                    mRecyclerView.setAdapter( mMovieGridAdapter );
-                    mScrollView.scrollTo( 0, 0 );
-                    mProgressBar.setVisibility( View.INVISIBLE );
-                    showhideButtons( jsonPages );
-                    showViews( false, null );
-                } else showViews( true, "Your search returned no Movies" );
-            } else showViews( true, "An error has occurred. Please try again" );
+            jsonPages = MovieDBUtilities.extractPage(jsonResponse);
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    LiveData<UrlMovieList> movieListUrlLiveData = mDb.MovieDao().checkIfRequestExists(urlString, jsonPages);
+                    Log.d(TAG, "run: " + movieListUrlLiveData);
+                    if (movieListUrlLiveData != null) {
+                        UrlMovieList movieListsUrl = movieListUrlLiveData.getValue();
+                        Log.d(TAG, "run: " + movieListsUrl);
+                        String JsonListString = movieListsUrl.getMoviesList();
+                        List<MovieData> movieList = MovieDBUtilities.getFilmListArrayFromDb(JsonListString, getApplicationContext());
+                        populateGridAdapter(movieList);
+                    } else {
+                        MovieDBUtilities.createMovieListFromUrl(jsonResponse, urlString, getApplicationContext());
+                        List<MovieData> movieList = MovieDBUtilities.getFilmListArrayFromDb(urlString, getApplicationContext());
+                        populateGridAdapter(movieList);
+                    }
+                }
+            });
+
+
+
         } else showViews( true, "An error has occurred. Please try again" );
+    }
+
+
+    private void populateGridAdapter(List<MovieData> movieList) {
+        if (movieList != null) {
+            if (movieList.size() > 0) {
+                // inicialização dos varios views a serem utilizados
+                MovieGridAdapter mMovieGridAdapter = new MovieGridAdapter(MainActivity.this);
+                mMovieGridAdapter.setMovieData(movieList);
+                mRecyclerView.setAdapter(mMovieGridAdapter);
+                mScrollView.scrollTo(0, 0);
+                mProgressBar.setVisibility(View.INVISIBLE);
+//                showhideButtons( jsonPages );
+                showViews(false, null);
+            } else showViews(true, "Your search returned no Movies");
+        } else showViews(true, "An error has occurred. Please try again");
+
     }
 
 

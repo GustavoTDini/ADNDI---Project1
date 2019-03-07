@@ -6,30 +6,26 @@ import com.example.android.project0_adndi.ProjectUtilities.NetworkUtilities;
 
 import java.net.URL;
 
-public class AsyncMovieTask extends AsyncTask <String, Void, String> {
+public class AsyncMovieTask extends AsyncTask<URL, Void, String> {
 
     private AsyncTaskDelegate delegate;
+
 
     AsyncMovieTask(AsyncTaskDelegate responder) {
         this.delegate = responder;
     }
 
     @Override
-    protected String doInBackground(String... params) {
+    protected String doInBackground(URL... params) {
 
         if (params.length == 0) {
             return null;
         }
-        // resgata os varios params da solicitação
-        String typeAPI = params[0];
-        String searchQuery = params[1];
-        String APIPages = params[2];
-
-        URL movieUrl = NetworkUtilities.buildMovieSearchURL( typeAPI, searchQuery, APIPages );
+        // resgata o Url de solicitação
+        URL searchUrl = params[0];
 
         try {
-            return NetworkUtilities.getResponseFromHttpUrl( movieUrl );
-//            return MovieDBUtilities.getMovieDataFromJson(movieJson);
+            return NetworkUtilities.getResponseFromHttpUrl(searchUrl);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -40,6 +36,6 @@ public class AsyncMovieTask extends AsyncTask <String, Void, String> {
     @Override
     protected void onPostExecute(String jsonResponse) {
         super.onPostExecute( jsonResponse );
-        if (delegate != null) delegate.processFinish( jsonResponse );
+        if (delegate != null) delegate.processFinish(jsonResponse);
     }
 }

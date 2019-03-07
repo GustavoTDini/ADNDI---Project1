@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.android.project0_adndi.DataUtilities.MovieData;
 import com.example.android.project0_adndi.ProjectUtilities.MovieDBUtilities;
 import com.squareup.picasso.Picasso;
 
@@ -37,12 +38,12 @@ public class DetailsActivity extends AppCompatActivity {
             String movieDate = movie.getMovieLaunchDate();
             String movieOverview = movie.getMovieOverView();
             String movieRanking = movie.getMovieRanking();
-            String moviePosterURL = MovieDBUtilities.getFinalImageURL( movie.getMoviePosterURL(), MovieDBUtilities.POSTER_INT );
-            String movieBackground = MovieDBUtilities.getFinalImageURL( movie.getMovieBackdropURL(), MovieDBUtilities.BACKDROP_INT );
+            String moviePosterDirPath = movie.getMoviePosterDirPath();
+            String movieBackgroundDirPath = movie.getMovieBackdropDirPath();
 
             // Define as View com os Valores do MovieData movie
-            Picasso.with(getBaseContext()).load(moviePosterURL).into(mMovieDetailPosterImageView);
-            Picasso.with(getBaseContext()).load(movieBackground).into(mMovieDetailBackdropImageView);
+            Picasso.with(getBaseContext()).load(moviePosterDirPath).into(mMovieDetailPosterImageView);
+            Picasso.with(getBaseContext()).load(movieBackgroundDirPath).into(mMovieDetailBackdropImageView);
             mMovieDetailDateTextView.setText(movieDate);
             mMovieDetailTitleTextView.setText(movieTitle);
             mMovieDetailOverviewTextView.setText(movieOverview);

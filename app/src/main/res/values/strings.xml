@@ -11,4 +11,7 @@
     <string name="menu_search_a_movie">Search a Movie</string>
     <string name="button_minus">-</string>
     <string name="button_add">+</string>
+
+    <!--Strings dos Generos-->
+
 </resources>

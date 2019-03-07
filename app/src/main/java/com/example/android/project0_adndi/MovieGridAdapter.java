@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.android.project0_adndi.DataUtilities.MovieData;
 import com.example.android.project0_adndi.ProjectUtilities.MovieDBUtilities;
 import com.squareup.picasso.Picasso;
 
@@ -69,8 +70,7 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
         Context thisContext = this.context;
         String movieTitle = mMovieList.get( position ).getMovieName();
         String movieRanking = mMovieList.get( position ).getMovieRanking();
-        int POSTER_INT = 301;
-        String moviePosterURL = MovieDBUtilities.getFinalImageURL(mMovieList.get(position).getMoviePosterURL(), POSTER_INT);
+        String moviePosterDirPath = mMovieList.get(position).getMoviePosterDirPath();
 
         viewHolder.mMovieTitleTextView.setText(movieTitle);
         viewHolder.mMovieRankingTextView.setText(movieRanking);
@@ -82,7 +82,7 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
         ImageView posterImageView = viewHolder.mMoviePosterImageView;
 
-        Picasso.with(context).load(moviePosterURL).into(posterImageView);
+        Picasso.with(context).load(moviePosterDirPath).into(posterImageView);
 
     }
 
