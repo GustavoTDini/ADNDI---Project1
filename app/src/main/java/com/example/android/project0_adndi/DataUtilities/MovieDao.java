@@ -29,24 +29,33 @@ public interface MovieDao {
     void updateUrlInfo(UrlMovieList urlRequest);
 
     @Delete
-    void deleteMovie(MovieData Movie);
-
-    @Delete
     void removeFavorite(FavoriteMovies Movie);
 
     @Query("DELETE FROM movieList")
     void emptyMovieCache();
 
+    @Query("DELETE FROM urlList")
+    void emptyUrlListCache();
+
     @Query("SELECT * FROM movieList WHERE movie_id = :movieId")
     LiveData<MovieData> loadMovieById(int movieId);
-
-    @Query("SELECT * FROM favorites")
-    LiveData<List<FavoriteMovies>> loadFavorites();
 
     @Query("SELECT EXISTS(SELECT 1 FROM movieList WHERE movie_id = :movieId)")
     boolean checkIfMovieExists(int movieId);
 
-    @Query("SELECT * FROM urlList WHERE request_url = :requestUrl AND request_page = :page")
+    @Query("SELECT EXISTS(SELECT 1 FROM urlList WHERE request_url = :requestUrl AND request_page = :page)")
     LiveData<UrlMovieList> checkIfRequestExists(String requestUrl, int page);
+
+    @Query("SELECT * FROM urlList WHERE request_url = :requestUrl AND request_page = :page")
+    LiveData<UrlMovieList> loadMovieUrlList(String requestUrl, int page);
+
+    @Query("SELECT * FROM movieList")
+    LiveData<List<MovieData>> updateMovieDb();
+
+    @Query("SELECT * FROM favorites")
+    LiveData<List<FavoriteMovies>> loadFavorites();
+
+    @Query("SELECT * FROM urlList")
+    LiveData<List<UrlMovieList>> updateMovieUrls();
 
 }

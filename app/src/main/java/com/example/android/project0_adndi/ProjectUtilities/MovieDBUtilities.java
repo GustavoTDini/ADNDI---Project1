@@ -10,7 +10,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.example.android.project0_adndi.AppExecutors;
 import com.example.android.project0_adndi.DataUtilities.AppDatabase;
 import com.example.android.project0_adndi.DataUtilities.MovieData;
 import com.example.android.project0_adndi.DataUtilities.UrlMovieList;

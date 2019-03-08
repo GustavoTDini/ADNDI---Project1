@@ -23,6 +23,8 @@ import android.widget.TextView;
 import com.example.android.project0_adndi.DataUtilities.AppDatabase;
 import com.example.android.project0_adndi.DataUtilities.MovieData;
 import com.example.android.project0_adndi.DataUtilities.UrlMovieList;
+import com.example.android.project0_adndi.ProjectUtilities.AppExecutors;
+import com.example.android.project0_adndi.ProjectUtilities.AsyncTaskDelegate;
 import com.example.android.project0_adndi.ProjectUtilities.MovieDBUtilities;
 import com.example.android.project0_adndi.ProjectUtilities.NetworkUtilities;
 

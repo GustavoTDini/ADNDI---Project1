@@ -2,6 +2,7 @@ package com.example.android.project0_adndi;
 
 import android.os.AsyncTask;
 
+import com.example.android.project0_adndi.ProjectUtilities.AsyncTaskDelegate;
 import com.example.android.project0_adndi.ProjectUtilities.NetworkUtilities;
 
 import java.net.URL;
