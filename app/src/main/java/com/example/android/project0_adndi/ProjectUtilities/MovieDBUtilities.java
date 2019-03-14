@@ -9,6 +9,7 @@ import android.util.SparseArray;
 import com.example.android.project0_adndi.DataUtilities.AppDatabase;
 import com.example.android.project0_adndi.DataUtilities.MovieData;
 import com.example.android.project0_adndi.DataUtilities.MovieReviews;
+import com.example.android.project0_adndi.DataUtilities.MovieVideos;
 import com.example.android.project0_adndi.DataUtilities.UrlMovieList;
 import com.example.android.project0_adndi.R;
 
@@ -25,6 +26,9 @@ public final class MovieDBUtilities {
     public static final int POSTER_INT = 301;
     // Código do BackDrop
     public static final int BACKDROP_INT = 302;
+    public static final String YOUTUBE_PATH = "http://img.youtube.com/vi/";
+    public static final String YOUTUBE_IMG = "/0.jpg";
+
     //  TAG desta Classe - para os erros
     private static final String LOG_TAG = MovieDBUtilities.class.getSimpleName();
     private static final SparseArray<String> gendersMap = new SparseArray<String>() {
@@ -458,6 +462,56 @@ public final class MovieDBUtilities {
 //            saveImageToInternal(movieToAdd.getMoviePosterUrl(), context);
         }
 
+    }
+
+    /**
+     * getMovieDataFromJson decodifica o filme do JSON em uma lista de MovieData, de modo
+     * que podemos recuperar esses dados em outras partes do App
+     *
+     * @param JsonString JSOn com os dados brutos dos filmes
+     */
+    public static List<MovieVideos> getMovieVideosFromJson(String JsonString) {
+
+        if (TextUtils.isEmpty(JsonString)) {
+            return null;
+        }
+
+        List<MovieVideos> videosList = new ArrayList<>();
+
+        try {
+
+            JSONObject root = new JSONObject(JsonString);
+
+            final int movieId = root.optInt("id");
+
+            JSONArray resultsJson = root.getJSONArray("results");
+
+            for (int resultsIndex = 0; resultsIndex < resultsJson.length(); resultsIndex++) {
+
+                JSONObject videoData = resultsJson.getJSONObject(resultsIndex);
+
+                if (videoData.optString("site").equals("YouTube")) {
+                    String videoTitle = videoData.optString("name");
+                    String videoKey = videoData.optString("key");
+
+
+                    final MovieVideos video = new MovieVideos(movieId, videoTitle, videoKey);
+
+                    videosList.add(video);
+                }
+
+            }
+
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Problem parsing the JSON results", e);
+        }
+
+        return videosList;
+
+    }
+
+    public static String getYoutubeThumbnailPath(String videoKey) {
+        return YOUTUBE_PATH + videoKey + YOUTUBE_IMG;
     }
 
 }

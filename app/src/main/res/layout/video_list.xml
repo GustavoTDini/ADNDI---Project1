@@ -5,42 +5,40 @@
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/tv_reviews_author"
+        android:id="@+id/tv_videos_title"
         style="@style/DetailLabel"
-        android:layout_height="18dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/tv_reviews_content"
+        app:layout_constraintBottom_toTopOf="@+id/videos_separation_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
+        android:id="@+id/videos_separation_bar"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
         android:background="@color/colorPrimaryDark"
         android:contentDescription="@string/review_list_up_bar"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_reviews_author"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_reviews_content" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_videos_title" />
 
-    <TextView
-        android:id="@+id/tv_reviews_content"
-        style="@style/DetailText"
-        android:layout_marginStart="16dp"
+    <ImageView
+        android:id="@+id/iv_videos_thumbnail"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:contentDescription="@string/video_thumbnail"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_reviews_author" />
+        app:layout_constraintTop_toBottomOf="@+id/videos_separation_bar" />
 
 </android.support.constraint.ConstraintLayout>

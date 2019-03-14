@@ -99,6 +99,12 @@
                 style="@style/DetailLabel"
                 android:text="@string/details_launch_date" />
 
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/colorPrimaryDark"
+                android:contentDescription="@string/details_label_bar" />
+
             <TextView
                 android:id="@+id/tv_details_movie_date"
                 style="@style/DetailText"
@@ -109,6 +115,12 @@
                 style="@style/DetailLabel"
                 android:text="@string/details_genre_label" />
 
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/colorPrimaryDark"
+                android:contentDescription="@string/details_label_bar" />
+
             <TextView
                 android:id="@+id/tv_details_movie_genres"
                 style="@style/DetailText" />
@@ -118,6 +130,12 @@
                 style="@style/DetailLabel"
                 android:text="@string/details_movie_overview" />
 
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/colorPrimaryDark"
+                android:contentDescription="@string/details_label_bar" />
+
             <TextView
                 android:id="@+id/tv_details_movie_overview"
                 style="@style/DetailText" />
@@ -126,6 +144,12 @@
                 android:id="@+id/tv_details_movie_videos_label"
                 style="@style/DetailLabel"
                 android:text="@string/details_movie_videos" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/colorPrimaryDark"
+                android:contentDescription="@string/details_label_bar" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rv_videos_list"
@@ -138,6 +162,12 @@
                 android:id="@+id/tv_details_movie_reviews_label"
                 style="@style/DetailLabel"
                 android:text="@string/details_movie_reviews" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/colorPrimaryDark"
+                android:contentDescription="@string/details_label_bar" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rv_review_list"

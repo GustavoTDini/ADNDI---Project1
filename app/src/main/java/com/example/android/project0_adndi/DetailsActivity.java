@@ -1,5 +1,6 @@
 package com.example.android.project0_adndi;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import com.example.android.project0_adndi.DataUtilities.MovieData;
 import com.example.android.project0_adndi.DataUtilities.MovieReviews;
+import com.example.android.project0_adndi.DataUtilities.MovieVideos;
 import com.example.android.project0_adndi.ProjectUtilities.AppExecutors;
 import com.example.android.project0_adndi.ProjectUtilities.MovieDBUtilities;
 import com.example.android.project0_adndi.ProjectUtilities.NetworkUtilities;
@@ -24,13 +26,17 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity implements MovieVideosAdapter.MovieVideosAdapterOnClickHandler {
 
     final String LOG_TAG = DetailsActivity.class.getSimpleName();
 
     List<MovieReviews> movieReviewsList;
 
+    List<MovieVideos> movieVideosList;
+
     RecyclerView mMovieDetailsReviewsRecycler;
+
+    RecyclerView mMovieDetailsVideosRecycler;
 
     int mMovieId = 0;
 
@@ -47,6 +53,7 @@ public class DetailsActivity extends AppCompatActivity {
         ImageView mMovieDetailPosterImageView = findViewById(R.id.iv_details_movie_poster);
         ImageView mMovieDetailBackdropImageView = findViewById(R.id.iv_details_background);
         mMovieDetailsReviewsRecycler = findViewById(R.id.rv_review_list);
+        mMovieDetailsVideosRecycler = findViewById(R.id.rv_videos_list);
 
 
         Intent intentThatStartedThisActivity = getIntent();
@@ -79,11 +86,8 @@ public class DetailsActivity extends AppCompatActivity {
 
         }
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        mMovieDetailsReviewsRecycler.setLayoutManager(layoutManager);
-
-
         testConnectionGetAndSaveReviewsData();
+        testConnectionAndGetVideosData();
 
     }
 
@@ -97,16 +101,26 @@ public class DetailsActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    public void onClick(MovieVideos video) {
+        Context context = this;
+        Class destinationClass = DetailsActivity.class;
+        Intent detailsIntent = new Intent(context, destinationClass);
+        detailsIntent.putExtra(MovieData.MOVIE_PARCEL, Parcels.wrap(video));
+        startActivity(detailsIntent);
+    }
+
     /**
      * populateGridAdapter Método que recebe a de reviews do filme e a coloca no RecyclerView
      *
      * @param reviewsList lista de reviews do filme a ser colocada no grid
      */
-    private void populateReviewsGrid(List<MovieReviews> reviewsList) {
+    private void populateReviewsList(List<MovieReviews> reviewsList) {
         if (reviewsList != null) {
             if (reviewsList.size() > 0) {
                 // use a linear layout manager
-
+                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+                mMovieDetailsReviewsRecycler.setLayoutManager(layoutManager);
                 MovieReviewsAdapter mMovieReviewsAdapter = new MovieReviewsAdapter(reviewsList);
                 mMovieDetailsReviewsRecycler.setAdapter(mMovieReviewsAdapter);
             } else Log.d(LOG_TAG, "populateGridAdapter: Your search returned no Movies");
@@ -124,7 +138,6 @@ public class DetailsActivity extends AppCompatActivity {
                     try {
                         String reviewsJson = NetworkUtilities.getResponseFromHttpUrl(reviewsUrl);
                         movieReviewsList = MovieDBUtilities.getMovieReviewsFromJson(reviewsJson);
-                        Log.d(LOG_TAG, "run: " + movieReviewsList);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -132,8 +145,7 @@ public class DetailsActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             if (movieReviewsList != null) {
-                                populateReviewsGrid(movieReviewsList);
-                                Log.d(LOG_TAG, "run: " + movieReviewsList);
+                                populateReviewsList(movieReviewsList);
                                 MovieDBUtilities.saveReviewsDataToDB(movieReviewsList, getApplicationContext());
                             }
 
@@ -145,4 +157,52 @@ public class DetailsActivity extends AppCompatActivity {
             Log.d(LOG_TAG, "populateGridAdapter: There´s no Internet Connection!!");
         }
     }
+
+    /**
+     * populateGridAdapter Método que recebe a de reviews do filme e a coloca no RecyclerView
+     *
+     * @param videosList lista de reviews do filme a ser colocada no grid
+     */
+    private void populateVideosList(List<MovieVideos> videosList) {
+        if (videosList != null) {
+            if (videosList.size() > 0) {
+                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+                mMovieDetailsVideosRecycler.setLayoutManager(layoutManager);
+                MovieVideosAdapter mMovieVideosAdapter = new MovieVideosAdapter(DetailsActivity.this, videosList);
+                mMovieDetailsVideosRecycler.setAdapter(mMovieVideosAdapter);
+            } else Log.d(LOG_TAG, "populateGridAdapter: Your search returned no Movies");
+        } else Log.d(LOG_TAG, "populateGridAdapter: An error has occurred. Please try again");
+    }
+
+
+    private void testConnectionAndGetVideosData() {
+        Boolean connected = NetworkUtilities.testConnection(getApplicationContext());
+        if (connected) {
+            final URL videosUrl = NetworkUtilities.createVideosReviewsUrl(String.valueOf(mMovieId), NetworkUtilities.VIDEOS);
+            AppExecutors.getInstance().networkIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String reviewsJson = NetworkUtilities.getResponseFromHttpUrl(videosUrl);
+                        movieVideosList = MovieDBUtilities.getMovieVideosFromJson(reviewsJson);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(LOG_TAG, "run: " + movieVideosList);
+                            if (movieReviewsList != null) {
+                                populateVideosList(movieVideosList);
+                            }
+
+                        }
+                    });
+                }
+            });
+        } else {
+            Log.d(LOG_TAG, "populateGridAdapter: There´s no Internet Connection!!");
+        }
+    }
+
 }
