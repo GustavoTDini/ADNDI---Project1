@@ -72,4 +72,15 @@ public class UrlMovieList {
     public void setMoviesList(String mMoviesList) {
         this.mMoviesList = mMoviesList;
     }
+
+    @Override
+    public String toString() {
+        return "UrlMovieList{" +
+                "mRequestId=" + mRequestId +
+                ", mRequestUrl='" + mRequestUrl + '\'' +
+                ", mRequestPage=" + mRequestPage +
+                ", mRequestPagesTotal=" + mRequestPagesTotal +
+                ", mMoviesList='" + mMoviesList + '\'' +
+                '}';
+    }
 }

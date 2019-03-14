@@ -11,6 +11,10 @@
     <string name="menu_search_a_movie">Search a Movie</string>
     <string name="button_minus">-</string>
     <string name="button_add">+</string>
+    <string name="details_genre_label">Genres</string>
+    <string name="details_movie_videos">Videos</string>
+    <string name="details_movie_reviews">Reviews</string>
+    <string name="review_list_up_bar">Review List up bar</string>
 
     <!--Strings dos Generos-->
 

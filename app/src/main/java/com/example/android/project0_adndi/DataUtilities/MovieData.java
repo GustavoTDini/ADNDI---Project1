@@ -35,23 +35,23 @@ public class MovieData implements Parcelable {
     private String mMovieName;
     private String mMovieGenre;
     private String mMovieRanking;
-    private String mMoviePosterDirPath;
+    private String mMoviePosterUrl;
     private String mMovieLaunchDate;
-    private String mMovieBackdropDirPath;
+    private String mMovieBackdropUrl;
     private String mMovieOverView;
 
     /**
      * Construtor da Classe
      */
     public MovieData(int movieId, String movieName, String movieGenre, String movieRanking,
-                     String moviePosterDirPath, String movieLaunchDate, String movieBackdropDirPath, String movieOverView) {
+                     String moviePosterUrl, String movieLaunchDate, String movieBackdropUrl, String movieOverView) {
         this.mMovieId = movieId;
         this.mMovieName = movieName;
         this.mMovieGenre = movieGenre;
         this.mMovieRanking = movieRanking;
-        this.mMoviePosterDirPath = moviePosterDirPath;
+        this.mMoviePosterUrl = moviePosterUrl;
         this.mMovieLaunchDate = movieLaunchDate;
-        this.mMovieBackdropDirPath = movieBackdropDirPath;
+        this.mMovieBackdropUrl = movieBackdropUrl;
         this.mMovieOverView = movieOverView;
     }
 
@@ -62,10 +62,11 @@ public class MovieData implements Parcelable {
     private MovieData(Parcel in) {
         mMovieId = in.readInt();
         mMovieName = in.readString();
+        this.mMovieGenre = in.readString();
         mMovieRanking = in.readString();
-        mMoviePosterDirPath = in.readString();
+        mMoviePosterUrl = in.readString();
         mMovieLaunchDate = in.readString();
-        mMovieBackdropDirPath = in.readString();
+        mMovieBackdropUrl = in.readString();
         mMovieOverView = in.readString();
     }
 
@@ -108,12 +109,12 @@ public class MovieData implements Parcelable {
         this.mMovieRanking = movieRanking;
     }
 
-    public String getMoviePosterDirPath() {
-        return mMoviePosterDirPath;
+    public String getMoviePosterUrl() {
+        return mMoviePosterUrl;
     }
 
-    public void setmMoviePosterDirPath(String moviePosterUrl) {
-        this.mMoviePosterDirPath = moviePosterUrl;
+    public void setmMoviePosterUrl(String moviePosterUrl) {
+        this.mMoviePosterUrl = moviePosterUrl;
     }
 
     public String getMovieLaunchDate() {
@@ -124,12 +125,12 @@ public class MovieData implements Parcelable {
         this.mMovieLaunchDate = movieLaunchDate;
     }
 
-    public String getMovieBackdropDirPath() {
-        return mMovieBackdropDirPath;
+    public String getMovieBackdropUrl() {
+        return mMovieBackdropUrl;
     }
 
-    public void setmMovieBackdropDirPath(String movieBackdropUrl) {
-        this.mMovieBackdropDirPath = movieBackdropUrl;
+    public void setmMovieBackdropUrl(String movieBackdropUrl) {
+        this.mMovieBackdropUrl = movieBackdropUrl;
     }
 
     public String getMovieOverView() {
@@ -139,7 +140,6 @@ public class MovieData implements Parcelable {
     public void setmMovieOverView(String movieOverView) {
         this.mMovieOverView = movieOverView;
     }
-
 
     @Override
     public int describeContents() {
@@ -152,9 +152,9 @@ public class MovieData implements Parcelable {
         parcel.writeString(mMovieName);
         parcel.writeString(mMovieGenre);
         parcel.writeString(mMovieRanking);
-        parcel.writeString(mMoviePosterDirPath);
+        parcel.writeString(mMoviePosterUrl);
         parcel.writeString(mMovieLaunchDate);
-        parcel.writeString(mMovieBackdropDirPath);
+        parcel.writeString(mMovieBackdropUrl);
         parcel.writeString(mMovieOverView);
     }
 
@@ -171,9 +171,9 @@ public class MovieData implements Parcelable {
                 "MovieName='" + mMovieName + '\'' +
                 ", MovieGenre='" + mMovieGenre + '\'' +
                 ", MovieRanking='" + mMovieRanking + '\'' +
-                ", MoviePosterURL='" + mMoviePosterDirPath + '\'' +
+                ", MoviePosterURL='" + mMoviePosterUrl + '\'' +
                 ", MovieLaunchDate='" + mMovieLaunchDate + '\'' +
-                ", MovieBackgroundURL='" + mMovieBackdropDirPath + '\'' +
+                ", MovieBackgroundURL='" + mMovieBackdropUrl + '\'' +
                 ", MovieOverView='" + mMovieOverView + '\'' +
                 '}';
     }

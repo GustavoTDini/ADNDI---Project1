@@ -1,5 +1,8 @@
 package com.example.android.project0_adndi.ProjectUtilities;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
 
@@ -20,17 +23,20 @@ public final class NetworkUtilities {
     private static final String TAG = NetworkUtilities.class.getSimpleName();
 
     // Strings com cada codigo dos diferentes tipos de queries
-    public static final String SEARCH = "1000";
-    public static final String POPULAR = "1010";
-    public static final String TOP_RATED = "1100";
-    public static final String UPCOMING = "1101";
-    public static final String NOW_PLAYING = "1110";
+    public static final String SEARCH = "0001";
+    public static final String POPULAR = "0010";
+    public static final String TOP_RATED = "0011";
+    public static final String UPCOMING = "0100";
+    public static final String NOW_PLAYING = "0101";
+
+    public static final String VIDEOS = "0110";
+    public static final String REVIEWS = "0111";
 
     // Codigo de resposta ok da conexão
     private static final int URL_CONNECTION_GET_RESPONSE_CODE = 200;
 
     // Base da URL do MovieDB
-    private static final String MOVIE_DB_BASE_URL = "http://api.themoviedb.org/3/";
+    private static final String MOVIE_DB_BASE_URL = "https://api.themoviedb.org/3/";
 
     // Endereços de cada query do MovieDB URL
     private static final String SEARCH_URL = "search/movie";
@@ -38,6 +44,9 @@ public final class NetworkUtilities {
     private static final String TOP_RATED_URL = "movie/top_rated";
     private static final String UPCOMING_URL = "movie/upcoming";
     private static final String NOW_PLAYING_URL = "movie/now_playing";
+    private static final String MOVIE_URL = "movie/";
+    private static final String REVIEWS_URL = "/reviews";
+    private static final String VIDEOS_URL = "/videos";
 
     // Chave da API
     private static final String MOVIE_DB_API_KEY = BuildConfig.MOVIE_DB_API_KEY;
@@ -63,7 +72,7 @@ public final class NetworkUtilities {
      * @param page  a pagina em que se encontra a query
      * @return a URL com os valores selecionados
      */
-    public static URL buildMovieSearchURL(String type, String query, String page) {
+    private static URL buildMovieSearchURL(String type, String query, String page) {
         Uri APIUri;
         URL APIUrl = null;
 
@@ -125,6 +134,67 @@ public final class NetworkUtilities {
     }
 
     /**
+     * createCurrentUrl Metodo que cria e URL de busca do MovieDB
+     *
+     * @param type tipo de busca a ser realizada
+     * @return URL url montada com base no tipo de busca
+     */
+    public static URL createCurrentUrl(String type, int currentPage, String query) {
+        URL newUrl;
+        String stringPages = String.valueOf(currentPage);
+        if (type.equals(SEARCH)) {
+            newUrl = NetworkUtilities.buildMovieSearchURL(type, query, stringPages);
+        } else {
+            newUrl = NetworkUtilities.buildMovieSearchURL(type, null, stringPages);
+        }
+        return newUrl;
+    }
+
+    /**
+     * createVideosReviewsUrl Metodo que cria e URL de detalhes, video ou reviews de um determinado filme de id definido
+     *
+     * @param id            ID do filme a ser buscado os detalhes (videos ou reviews)
+     * @param videoOrReview String que irá decodificar se buscamos os videos ou os reviews
+     * @return URL url montada com base no tipo de busca
+     */
+    public static URL createVideosReviewsUrl(String id, String videoOrReview) {
+
+        Uri DetailsUri;
+        URL detailsUrl = null;
+        String detailsPages = "1";
+
+        switch (videoOrReview) {
+            case VIDEOS:
+                DetailsUri = Uri.parse(MOVIE_DB_BASE_URL + MOVIE_URL + id + VIDEOS_URL).buildUpon()
+                        .appendQueryParameter(API_PARAM, MOVIE_DB_API_KEY)
+                        .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE)
+                        .build();
+                break;
+            case REVIEWS:
+                DetailsUri = Uri.parse(MOVIE_DB_BASE_URL + MOVIE_URL + id + REVIEWS_URL).buildUpon()
+                        .appendQueryParameter(API_PARAM, MOVIE_DB_API_KEY)
+                        .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE)
+                        .appendQueryParameter(PAGE_PARAM, detailsPages)
+                        .build();
+                break;
+
+            default:
+                DetailsUri = null;
+        }
+
+        // Verifica se o URL é valido
+        try {
+            detailsUrl = new URL(DetailsUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG, "createVideosReviewsUrl: " + detailsUrl);
+
+        return detailsUrl;
+    }
+
+    /**
      * readFromStream é utilizado para lermos o fluxo de informações da Conexão e criarmos o JSON
      *
      * @param inputStream fluxo de informação da conexão aberta
@@ -183,5 +253,18 @@ public final class NetworkUtilities {
         }
         return jsonResponse;
     }
+
+    /**
+     * testConnectionAndGetDataAndSave Metodo que testará ser a conexão está ativa
+     *
+     * @return Boolean mostrando se a conexão foi bem sucedida
+     */
+    static public Boolean testConnection(Context context) {
+        ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        assert connMgr != null;
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
+    }
+
 
 }

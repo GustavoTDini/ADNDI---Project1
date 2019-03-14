@@ -70,11 +70,11 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
         Context thisContext = this.context;
         String movieTitle = mMovieList.get( position ).getMovieName();
         String movieRanking = mMovieList.get( position ).getMovieRanking();
-        String moviePosterDirPath = mMovieList.get(position).getMoviePosterDirPath();
+        String moviePosterUrl = mMovieList.get(position).getMoviePosterUrl();
 
         viewHolder.mMovieTitleTextView.setText(movieTitle);
         viewHolder.mMovieRankingTextView.setText(movieRanking);
-        int colorInt = MovieDBUtilities.getScoreColor(Double.parseDouble(movieRanking));
+        int colorInt = MovieDBUtilities.getScoreColor(Integer.parseInt(movieRanking));
         int colorId = ContextCompat.getColor(thisContext, colorInt);
         viewHolder.mMovieRankingTextView.getBackground().setColorFilter(colorId, PorterDuff.Mode.SRC_ATOP);
 
@@ -82,7 +82,7 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
         ImageView posterImageView = viewHolder.mMoviePosterImageView;
 
-        Picasso.with(context).load(moviePosterDirPath).into(posterImageView);
+        Picasso.with(context).load(MovieDBUtilities.getFinalImageUrl(moviePosterUrl, MovieDBUtilities.POSTER_INT)).into(posterImageView);
 
     }
 

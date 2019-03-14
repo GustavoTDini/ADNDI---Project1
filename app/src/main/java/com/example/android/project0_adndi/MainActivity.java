@@ -1,11 +1,8 @@
 package com.example.android.project0_adndi;
 
-import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -16,24 +13,24 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.android.project0_adndi.DataUtilities.AppDatabase;
 import com.example.android.project0_adndi.DataUtilities.MovieData;
-import com.example.android.project0_adndi.DataUtilities.UrlMovieList;
 import com.example.android.project0_adndi.ProjectUtilities.AppExecutors;
-import com.example.android.project0_adndi.ProjectUtilities.AsyncTaskDelegate;
 import com.example.android.project0_adndi.ProjectUtilities.MovieDBUtilities;
 import com.example.android.project0_adndi.ProjectUtilities.NetworkUtilities;
 
 import org.parceler.Parcels;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements MovieGridAdapter.MovieGridAdapterOnClickHandler, AsyncTaskDelegate {
+public class MainActivity extends AppCompatActivity implements MovieGridAdapter.MovieGridAdapterOnClickHandler {
 
     //  TAG desta Classe - para os erros
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -43,26 +40,34 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
 
     // int com o total de View do grid em Modo retrato
     private static final int PORTRAIT_SPAM = 2;
+
     // int com o numero de paginas atual
-    int jsonPages = 1;
+    int currentPage = 1;
 
     // int com o numero de paginas totais
     int totalPages = 2;
 
     // Iniciação da DataBase
     private static AppDatabase mDb;
+
+    //url a ser utilizado
     URL currentUrl;
+
+    String currentJson;
+
+    List<MovieData> movieDataList;
 
     // string com o query para a SEARCH
     String query = "";
+
     // string com o tipo selecionado - iniciado com POPULAR
     String selectedType = NetworkUtilities.POPULAR;
 
     private RecyclerView mRecyclerView;
     private TextView mErrorMessageDisplay;
     private ProgressBar mProgressBar;
-    //    private Button mAddPagesButton;
-//    private Button mDecreasePagesButton;
+    private Button mAddPagesButton;
+    private Button mDecreasePagesButton;
     private ScrollView mScrollView;
 
     @Override
@@ -81,30 +86,29 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         // definição pelo findViewById do ProgressBar que indicará atividade de rede
         mProgressBar = findViewById(R.id.pb_loading_indicator);
 
-//        // definição pelo findViewById do Button que aumenta 1 pagina
-//        mAddPagesButton = findViewById(R.id.bt_page_up);
-//
-//        // definição pelo findViewById do Button que diminui 1 pagina
-//        mDecreasePagesButton = findViewById(R.id.bt_page_down);
+        // definição pelo findViewById do Button que aumenta 1 pagina
+        mAddPagesButton = findViewById(R.id.bt_page_up);
 
-        mScrollView = findViewById( R.id.sv_main_activity );
+        // definição pelo findViewById do Button que diminui 1 pagina
+        mDecreasePagesButton = findViewById(R.id.bt_page_down);
 
-//        // ClickListener de mAddPagesButton utiliza o metodo addDecreasePages
-//        mAddPagesButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                addDecreasePages(true);
-//            }
-//        });
-//
-//        // ClickListener de mDecreasePagesButton utiliza o metodo addDecreasePages
-//        mDecreasePagesButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                addDecreasePages(false);
-//            }
-//        });
+        mScrollView = findViewById(R.id.sv_main_activity);
 
+        // ClickListener de mAddPagesButton utiliza o metodo addDecreasePages
+        mAddPagesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addDecreasePages(true);
+            }
+        });
+
+        // ClickListener de mDecreasePagesButton utiliza o metodo addDecreasePages
+        mDecreasePagesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addDecreasePages(false);
+            }
+        });
 
         // Recebimento da orientação e definição do gridSpam para a correta exibição da View
         int orientation = getResources().getConfiguration().orientation;
@@ -118,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         mRecyclerView.setLayoutManager(layoutManager);
 
         // inicia o AsynTask com um teste de concexão
-        testConnectionAndStartAsync(selectedType);
+        testConnectionGetAndSaveData(selectedType);
 
     }
 
@@ -181,16 +185,16 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
 
         switch (id) {
             case R.id.action_popular:
-                testConnectionAndStartAsync( NetworkUtilities.POPULAR );
+                testConnectionGetAndSaveData(NetworkUtilities.POPULAR);
                 return true;
             case R.id.action_top_rated:
-                testConnectionAndStartAsync( NetworkUtilities.TOP_RATED );
+                testConnectionGetAndSaveData(NetworkUtilities.TOP_RATED);
                 return true;
             case R.id.action_upcoming:
-                testConnectionAndStartAsync( NetworkUtilities.UPCOMING );
+                testConnectionGetAndSaveData(NetworkUtilities.UPCOMING);
                 return true;
             case R.id.action_now_playing:
-                testConnectionAndStartAsync( NetworkUtilities.NOW_PLAYING );
+                testConnectionGetAndSaveData(NetworkUtilities.NOW_PLAYING);
                 return true;
         }
 
@@ -216,46 +220,13 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
     }
 
     /**
-     * testConnectionAndStartAsync Metodo que testará ser a conexão está ativa e em caso positivo
-     * inicia o AsyncMovieTask
-     *
-     * @param type tipo de busca a ser realizada
-     */
-    private void testConnectionAndStartAsync(String type) {
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        assert connMgr != null;
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        mProgressBar.setVisibility( View.VISIBLE );
-        mErrorMessageDisplay.setVisibility( View.INVISIBLE );
-        mRecyclerView.setVisibility( View.INVISIBLE );
-        if (networkInfo != null && networkInfo.isConnected()) {
-            String stringPages = String.valueOf( jsonPages );
-            selectedType = type;
-            if (selectedType.equals( NetworkUtilities.SEARCH )) {
-                currentUrl = NetworkUtilities.buildMovieSearchURL(selectedType, query, stringPages);
-            } else {
-                currentUrl = NetworkUtilities.buildMovieSearchURL(selectedType, null, stringPages);
-            }
-            new AsyncMovieTask(new AsyncTaskDelegate() {
-                @Override
-                public void processFinish(String output) {
-                    finishAsyncProcess(output);
-                }
-            }).execute(currentUrl);
-//            showhideButtons( jsonPages );
-        } else {
-            showViews(true, "There´s no Internet Connection!!");
-        }
-    }
-
-    /**
      * doMySearch Metodo que fará uma nova busca de acordo com query
      *
      * @param searchQuery string a ser buscada em SEARCH
      */
     private void doMySearch(String searchQuery) {
         query = searchQuery;
-        testConnectionAndStartAsync( NetworkUtilities.SEARCH );
+        testConnectionGetAndSaveData(NetworkUtilities.SEARCH);
     }
 
     /**
@@ -266,83 +237,128 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
      */
     private void addDecreasePages(boolean add) {
         if (add) {
-            if (jsonPages < totalPages) jsonPages++;
+            if (currentPage < totalPages) currentPage++;
         } else {
-            if (jsonPages != 1) jsonPages--;
+            if (currentPage != 1) currentPage--;
         }
-        testConnectionAndStartAsync(selectedType);
+        testConnectionGetAndSaveData(selectedType);
     }
 
-//    /**
-//     * showhideButtons Método para definir a visibilidade dos botões de controle de paginas
-//     */
-//    private void showhideButtons(int pages) {
-//        mAddPagesButton.setVisibility( View.VISIBLE );
-//        mDecreasePagesButton.setVisibility( View.VISIBLE );
-//        if (pages == 1) {
-//            mDecreasePagesButton.setVisibility(View.GONE);
-//        }
-//        if (pages == totalPages) {
-//            mAddPagesButton.setVisibility(View.GONE);
-//        }
-//    }
-
-    @Override
-    public void processFinish(String output) {
-        finishAsyncProcess( output );
+    /**
+     * showHideButtons Método para definir a visibilidade dos botões de controle de paginas
+     */
+    private void showHideButtons(int pages) {
+        mAddPagesButton.setVisibility(View.VISIBLE);
+        mDecreasePagesButton.setVisibility(View.VISIBLE);
+        if (pages == 1) {
+            mDecreasePagesButton.setVisibility(View.GONE);
+        }
+        if (pages == totalPages) {
+            mAddPagesButton.setVisibility(View.GONE);
+        }
     }
 
-    public void finishAsyncProcess(final String jsonResponse) {
-
-
-        mDb = AppDatabase.getInstance(getApplicationContext());
-
-        final String urlString = currentUrl.toString();
-
-        // retorna apenas se a resposta for válido
-        if (jsonResponse != null) {
-            jsonPages = MovieDBUtilities.extractPage(jsonResponse);
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    LiveData<UrlMovieList> movieListUrlLiveData = mDb.MovieDao().checkIfRequestExists(urlString, jsonPages);
-                    Log.d(TAG, "run: " + movieListUrlLiveData);
-                    if (movieListUrlLiveData != null) {
-                        UrlMovieList movieListsUrl = movieListUrlLiveData.getValue();
-                        Log.d(TAG, "run: " + movieListsUrl);
-                        String JsonListString = movieListsUrl.getMoviesList();
-                        List<MovieData> movieList = MovieDBUtilities.getFilmListArrayFromDb(JsonListString, getApplicationContext());
-                        populateGridAdapter(movieList);
-                    } else {
-                        MovieDBUtilities.createMovieListFromUrl(jsonResponse, urlString, getApplicationContext());
-                        List<MovieData> movieList = MovieDBUtilities.getFilmListArrayFromDb(urlString, getApplicationContext());
-                        populateGridAdapter(movieList);
-                    }
-                }
-            });
-
-
-
-        } else showViews( true, "An error has occurred. Please try again" );
-    }
-
-
+    /**
+     * populateGridAdapter Método que recebe a lista de filmes e a coloca no RecyclerView
+     *
+     * @param movieList lista de filmes a ser colocada no grid
+     */
     private void populateGridAdapter(List<MovieData> movieList) {
+        Log.d(TAG, "populateGridAdapter: " + movieList);
         if (movieList != null) {
             if (movieList.size() > 0) {
-                // inicialização dos varios views a serem utilizados
                 MovieGridAdapter mMovieGridAdapter = new MovieGridAdapter(MainActivity.this);
                 mMovieGridAdapter.setMovieData(movieList);
                 mRecyclerView.setAdapter(mMovieGridAdapter);
                 mScrollView.scrollTo(0, 0);
+                showHideButtons(currentPage);
                 mProgressBar.setVisibility(View.INVISIBLE);
-//                showhideButtons( jsonPages );
                 showViews(false, null);
             } else showViews(true, "Your search returned no Movies");
         } else showViews(true, "An error has occurred. Please try again");
-
     }
 
+
+    private void testConnectionGetAndSaveData(String type) {
+        Boolean connected = NetworkUtilities.testConnection(getApplicationContext());
+        if (connected) {
+            currentUrl = NetworkUtilities.createCurrentUrl(type, currentPage, query);
+            AppExecutors.getInstance().networkIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        currentJson = NetworkUtilities.getResponseFromHttpUrl(currentUrl);
+                        totalPages = MovieDBUtilities.extractTotalPages(currentJson);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    movieDataList = MovieDBUtilities.getMovieDataFromJson(currentJson);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "run: " + movieDataList);
+                            populateGridAdapter(movieDataList);
+                            MovieDBUtilities.saveMoviesDataToDB(movieDataList, getApplicationContext());
+                        }
+                    });
+                }
+            });
+            MovieDBUtilities.createMovieListFromUrl(currentJson, String.valueOf(currentPage), getApplicationContext());
+        } else {
+            showViews(true, "There´s no Internet Connection!!");
+        }
+    }
+
+
+//    private void getMovieDatafromDB(final String JsonString){
+//
+//        mDb = AppDatabase.getInstance(getApplicationContext());
+//
+//        final String urlString = currentUrl.toString();
+//
+//        if (JsonString != null) {
+//            currentPage = MovieDBUtilities.extractTotalPages(JsonString);
+//            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+//                @Override
+//                public void run() {
+//                    UrlMovieList movieListUrl = mDb.MovieDao().loadMovieUrlList(urlString, currentPage);
+//                    if (movieListUrl != null) {
+//                        String JsonListString = movieListUrl.getMoviesList();
+//                        List<MovieData> movieList = MovieDBUtilities.getFilmListArrayFromDb(JsonListString, getApplicationContext());
+//                        Log.d(TAG, "run: " + movieList);
+//                        populateGridAdapter(movieList);
+//                    } else {
+//                        MovieDBUtilities.createMovieListFromUrl(JsonString, urlString, getApplicationContext());
+//                        List<MovieData> movieList = MovieDBUtilities.getFilmListArrayFromDb(urlString, getApplicationContext());
+//                        populateGridAdapter(movieList);
+//                    }
+//                }
+//            });
+//
+//
+//
+//
+//        } else showViews( true, "An error has occurred. Please try again" );
+//
+//    }
+
+    private boolean checkIfDataExistsInDB(final String JsonString, final int page) {
+
+        // Criei está variável como uma array para poder modificar o valor mesmo sendo final
+        final Boolean[] isDataInDbBoolean = {false};
+
+        mDb = AppDatabase.getInstance(getApplicationContext());
+
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                isDataInDbBoolean[0] = mDb.MovieDao().checkIfRequestExists(JsonString, page);
+
+            }
+        });
+
+        return isDataInDbBoolean[0];
+    }
 
 }
 
