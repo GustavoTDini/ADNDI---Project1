@@ -2,10 +2,12 @@ package com.example.android.project0_adndi.DataUtilities;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 @Entity(tableName = "movieReviews")
+@ForeignKey(entity = MovieData.class, parentColumns = "movie_id", childColumns = "movie_id")
 public class MovieReviews {
 
     @PrimaryKey(autoGenerate = true)

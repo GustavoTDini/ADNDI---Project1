@@ -5,7 +5,7 @@
 
     <item
         android:id="@+id/sv_search_movie"
-        android:icon="@mipmap/search_white"
+        android:icon="@drawable/baseline_search_white_36"
         android:title="@string/menu_search_a_movie"
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="always" />
@@ -29,5 +29,15 @@
         android:id="@+id/action_now_playing"
         android:orderInCategory="4"
         android:title="@string/menu_now_playing" />
+
+    <item
+        android:id="@+id/action_favorites"
+        android:orderInCategory="4"
+        android:title="@string/menu_favorites" />
+
+    <item
+        android:id="@+id/action_empty_cache"
+        android:orderInCategory="4"
+        android:title="@string/menu_clear_movies_cache" />
 
 </menu>

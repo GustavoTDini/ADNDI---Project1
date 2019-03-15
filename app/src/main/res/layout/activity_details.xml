@@ -151,12 +151,52 @@
                 android:background="@color/colorPrimaryDark"
                 android:contentDescription="@string/details_label_bar" />
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rv_videos_list"
+            <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="4dp"
-                android:minHeight="100dp" />
+                android:layout_height="match_parent">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_videos_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:minHeight="100dp" />
+
+                <TextView
+                    android:id="@+id/tv_videos_error_message_display"
+                    android:layout_width="match_parent"
+                    android:layout_height="59dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:padding="16dp"
+                    android:tag="Message"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/rv_videos_list" />
+
+                <ProgressBar
+                    android:id="@+id/pb_videos_loading_indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:theme="@style/ProgressBarTheme"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/tv_videos_error_message_display"
+                    app:layout_constraintStart_toStartOf="@+id/rv_videos_list"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
+            </android.support.constraint.ConstraintLayout>
 
             <TextView
                 android:id="@+id/tv_details_movie_reviews_label"
@@ -169,12 +209,53 @@
                 android:background="@color/colorPrimaryDark"
                 android:contentDescription="@string/details_label_bar" />
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rv_review_list"
+            <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="4dp"
-                android:minHeight="100dp" />
+                android:layout_height="match_parent">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_review_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:minHeight="100dp" />
+
+                <TextView
+                    android:id="@+id/tv_reviews_error_message_display"
+                    android:layout_width="match_parent"
+                    android:layout_height="59dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:padding="16dp"
+                    android:tag="Message"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/rv_review_list" />
+
+                <ProgressBar
+                    android:id="@+id/pb_reviews_loading_indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:theme="@style/ProgressBarTheme"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/tv_reviews_error_message_display"
+                    app:layout_constraintStart_toStartOf="@+id/rv_review_list"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
+            </android.support.constraint.ConstraintLayout>
+
 
         </LinearLayout>
 

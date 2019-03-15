@@ -263,7 +263,9 @@ public final class NetworkUtilities {
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         assert connMgr != null;
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnected();
+        Boolean connected = (networkInfo != null && networkInfo.isConnected());
+        Log.d(TAG, "testConnection: " + connected);
+        return connected;
     }
 
 

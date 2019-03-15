@@ -6,12 +6,12 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 import android.util.Log;
 
-@Database(entities = {MovieData.class, FavoriteMovies.class, UrlMovieList.class, MovieReviews.class}, version = 4, exportSchema = false)
+@Database(entities = {MovieData.class, FavoriteMovies.class, UrlMovieList.class, MovieReviews.class}, version = 6, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static final String LOG_TAG = AppDatabase.class.getSimpleName();
     private static final Object LOCK = new Object();
-    private static final String DATABASE_NAME = "MovieList";
+    private static final String DATABASE_NAME = "MovieDb";
     private static AppDatabase sInstance;
 
     public static AppDatabase getInstance(Context context) {
@@ -29,6 +29,12 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     public abstract MovieDao MovieDao();
+
+    public abstract ReviewsDao ReviewsDao();
+
+    public abstract FavoritesDao FavoritesDao();
+
+    public abstract UrlDao UrlDao();
 
 
 }

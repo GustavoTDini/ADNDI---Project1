@@ -1,6 +1,6 @@
 package com.example.android.project0_adndi;
 
-import android.content.Context;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -9,9 +9,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.android.project0_adndi.DataUtilities.AppDatabase;
+import com.example.android.project0_adndi.DataUtilities.FavoriteMovies;
 import com.example.android.project0_adndi.DataUtilities.MovieData;
 import com.example.android.project0_adndi.DataUtilities.MovieReviews;
 import com.example.android.project0_adndi.DataUtilities.MovieVideos;
@@ -39,6 +43,11 @@ public class DetailsActivity extends AppCompatActivity implements MovieVideosAda
     RecyclerView mMovieDetailsVideosRecycler;
 
     int mMovieId = 0;
+
+    // Iniciação da DataBase
+    private static AppDatabase mDb;
+
+    private Menu mFavoriteStarMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +100,32 @@ public class DetailsActivity extends AppCompatActivity implements MovieVideosAda
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.details_activity_menu, menu);
+        MenuItem favoriteStar = menu.findItem(R.id.action_favorite_star);
+
+        if (MovieDBUtilities.checkIfMovieIsFavorite(mMovieId, getApplicationContext())) {
+            favoriteStar.setIcon(R.drawable.baseline_star_white_36);
+        } else {
+            favoriteStar.setIcon(R.drawable.baseline_star_border_white_36);
+        }
+
+        mFavoriteStarMenu = menu;
+        return super.onCreateOptionsMenu(menu);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_favorite_star) {
+            addRemoveFromFavorites();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     /**
      * Método em Override para modificar o funcionamento do Navigate Up, desse modo
      * ao retornarmos a atividade anterior, a busca continuará a mesma
@@ -103,11 +138,7 @@ public class DetailsActivity extends AppCompatActivity implements MovieVideosAda
 
     @Override
     public void onClick(MovieVideos video) {
-        Context context = this;
-        Class destinationClass = DetailsActivity.class;
-        Intent detailsIntent = new Intent(context, destinationClass);
-        detailsIntent.putExtra(MovieData.MOVIE_PARCEL, Parcels.wrap(video));
-        startActivity(detailsIntent);
+        openYoutubeIntent(video.getVideoKey());
     }
 
     /**
@@ -166,7 +197,7 @@ public class DetailsActivity extends AppCompatActivity implements MovieVideosAda
     private void populateVideosList(List<MovieVideos> videosList) {
         if (videosList != null) {
             if (videosList.size() > 0) {
-                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
                 mMovieDetailsVideosRecycler.setLayoutManager(layoutManager);
                 MovieVideosAdapter mMovieVideosAdapter = new MovieVideosAdapter(DetailsActivity.this, videosList);
                 mMovieDetailsVideosRecycler.setAdapter(mMovieVideosAdapter);
@@ -204,5 +235,57 @@ public class DetailsActivity extends AppCompatActivity implements MovieVideosAda
             Log.d(LOG_TAG, "populateGridAdapter: There´s no Internet Connection!!");
         }
     }
+
+    private void openYoutubeIntent(String youtubeKey) {
+        try {
+            Intent appIntent = new Intent(Intent.ACTION_VIEW, MovieDBUtilities.getYoutubeVideoPath(youtubeKey, true));
+            this.startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            Intent webIntent = new Intent(Intent.ACTION_VIEW, MovieDBUtilities.getYoutubeVideoPath(youtubeKey, false));
+            this.startActivity(webIntent);
+        }
+
+    }
+
+    private void addRemoveFromFavorites() {
+
+        mDb = AppDatabase.getInstance(getApplicationContext());
+
+        final FavoriteMovies favorite = new FavoriteMovies(mMovieId);
+
+        final MenuItem favoriteStar = mFavoriteStarMenu.findItem(R.id.action_favorite_star);
+
+        if (MovieDBUtilities.checkIfMovieIsFavorite(mMovieId, getApplicationContext())) {
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    mDb.FavoritesDao().removeFavorite(favorite);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            favoriteStar.setIcon(R.drawable.baseline_star_border_white_36);
+                        }
+                    });
+                }
+
+            });
+        } else {
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    mDb.FavoritesDao().addNewFavorite(favorite);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            favoriteStar.setIcon(R.drawable.baseline_star_white_36);
+                        }
+                    });
+                }
+            });
+        }
+
+    }
+
+
 
 }

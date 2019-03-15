@@ -17,6 +17,8 @@
     <string name="review_list_up_bar">Review List up bar</string>
     <string name="details_label_bar">Details Label Bar</string>
     <string name="video_thumbnail">Video Thumbnail</string>
+    <string name="menu_clear_movies_cache">Clear Movies Cache</string>
+    <string name="menu_favorites">Favorites</string>
 
     <!--Strings dos Generos-->
 

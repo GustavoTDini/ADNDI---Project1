@@ -1,6 +1,8 @@
 package com.example.android.project0_adndi;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.android.project0_adndi.DataUtilities.AppDatabase;
+import com.example.android.project0_adndi.DataUtilities.FavoriteMovies;
 import com.example.android.project0_adndi.DataUtilities.MovieData;
 import com.example.android.project0_adndi.ProjectUtilities.AppExecutors;
 import com.example.android.project0_adndi.ProjectUtilities.MovieDBUtilities;
@@ -57,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
 
     List<MovieData> movieDataList;
 
+    List<FavoriteMovies> favoriteList;
+
     // string com o query para a SEARCH
     String query = "";
 
@@ -81,10 +86,10 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         mRecyclerView = findViewById(R.id.rv_movie_list);
 
         // definição pelo findViewById do Texview que mostrará as mensagem de erro
-        mErrorMessageDisplay = findViewById(R.id.tv_error_message_display);
+        mErrorMessageDisplay = findViewById(R.id.tv_reviews_error_message_display);
 
         // definição pelo findViewById do ProgressBar que indicará atividade de rede
-        mProgressBar = findViewById(R.id.pb_loading_indicator);
+        mProgressBar = findViewById(R.id.pb_reviews_loading_indicator);
 
         // definição pelo findViewById do Button que aumenta 1 pagina
         mAddPagesButton = findViewById(R.id.bt_page_up);
@@ -196,6 +201,12 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
             case R.id.action_now_playing:
                 testConnectionGetAndSaveData(NetworkUtilities.NOW_PLAYING);
                 return true;
+            case R.id.action_favorites:
+                getAndShowFavorites();
+                return true;
+            case R.id.action_empty_cache:
+                deleteAllCache();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -207,9 +218,9 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
      * @param error     boolean para verificar se houve erro
      * @param errorText caso tenha ocorrido um erro mostrará esta mensagem em mErrorMessageDisplay
      */
-    private void showViews(Boolean error, String errorText) {
+    public void showViews(Boolean error, String errorText) {
+        Log.d(TAG, "ShowViews: " + error.toString());
         if (error) {
-            Log.v(TAG, "ShowViews " + error.toString());
             mErrorMessageDisplay.setVisibility(View.VISIBLE);
             mErrorMessageDisplay.setText(errorText);
             mRecyclerView.setVisibility(View.INVISIBLE);
@@ -217,6 +228,7 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
             mErrorMessageDisplay.setVisibility(View.INVISIBLE);
             mRecyclerView.setVisibility(View.VISIBLE);
         }
+        mProgressBar.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -272,7 +284,6 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
                 mRecyclerView.setAdapter(mMovieGridAdapter);
                 mScrollView.scrollTo(0, 0);
                 showHideButtons(currentPage);
-                mProgressBar.setVisibility(View.INVISIBLE);
                 showViews(false, null);
             } else showViews(true, "Your search returned no Movies");
         } else showViews(true, "An error has occurred. Please try again");
@@ -281,7 +292,11 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
 
     private void testConnectionGetAndSaveData(String type) {
         Boolean connected = NetworkUtilities.testConnection(getApplicationContext());
+        Log.d(TAG, "testConnectionGetAndSaveData: " + connected);
+
         if (connected) {
+            mProgressBar.setVisibility(View.VISIBLE);
+            mRecyclerView.removeAllViewsInLayout();
             currentUrl = NetworkUtilities.createCurrentUrl(type, currentPage, query);
             AppExecutors.getInstance().networkIO().execute(new Runnable() {
                 @Override
@@ -299,48 +314,31 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
                             Log.d(TAG, "run: " + movieDataList);
                             populateGridAdapter(movieDataList);
                             MovieDBUtilities.saveMoviesDataToDB(movieDataList, getApplicationContext());
+                            mProgressBar.setVisibility(View.INVISIBLE);
                         }
                     });
                 }
             });
             MovieDBUtilities.createMovieListFromUrl(currentJson, String.valueOf(currentPage), getApplicationContext());
+        } else if (checkIfDataExistsInDB(currentJson, currentPage)) {
+            movieDataList = MovieDBUtilities.getMovieDataFromDB(currentJson, currentPage, getApplicationContext());
+            if (movieDataList != null) {
+                populateGridAdapter(movieDataList);
+            }
         } else {
             showViews(true, "There´s no Internet Connection!!");
         }
     }
 
-
-//    private void getMovieDatafromDB(final String JsonString){
-//
-//        mDb = AppDatabase.getInstance(getApplicationContext());
-//
-//        final String urlString = currentUrl.toString();
-//
-//        if (JsonString != null) {
-//            currentPage = MovieDBUtilities.extractTotalPages(JsonString);
-//            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-//                @Override
-//                public void run() {
-//                    UrlMovieList movieListUrl = mDb.MovieDao().loadMovieUrlList(urlString, currentPage);
-//                    if (movieListUrl != null) {
-//                        String JsonListString = movieListUrl.getMoviesList();
-//                        List<MovieData> movieList = MovieDBUtilities.getFilmListArrayFromDb(JsonListString, getApplicationContext());
-//                        Log.d(TAG, "run: " + movieList);
-//                        populateGridAdapter(movieList);
-//                    } else {
-//                        MovieDBUtilities.createMovieListFromUrl(JsonString, urlString, getApplicationContext());
-//                        List<MovieData> movieList = MovieDBUtilities.getFilmListArrayFromDb(urlString, getApplicationContext());
-//                        populateGridAdapter(movieList);
-//                    }
-//                }
-//            });
-//
-//
-//
-//
-//        } else showViews( true, "An error has occurred. Please try again" );
-//
-//    }
+    private void getAndShowFavorites() {
+        mDb = AppDatabase.getInstance(getApplicationContext());
+        mProgressBar.setVisibility(View.VISIBLE);
+        mRecyclerView.removeAllViewsInLayout();
+        movieDataList = MovieDBUtilities.getFilmListArrayFromFavorites(getApplicationContext());
+        if (movieDataList != null) {
+            populateGridAdapter(movieDataList);
+        }
+    }
 
     private boolean checkIfDataExistsInDB(final String JsonString, final int page) {
 
@@ -352,13 +350,42 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                isDataInDbBoolean[0] = mDb.MovieDao().checkIfRequestExists(JsonString, page);
-
+                isDataInDbBoolean[0] = mDb.UrlDao().checkIfRequestExists(JsonString, page);
             }
         });
-
         return isDataInDbBoolean[0];
     }
 
+    private void deleteAllCache() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Confirm Data Exclusion")
+                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        final AppDatabase mDb = AppDatabase.getInstance(getApplicationContext());
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                mDb.FavoritesDao().emptyFavorites();
+                                mDb.MovieDao().emptyMovieCache();
+                                mDb.ReviewsDao().emptyReviewsCache();
+                                mDb.UrlDao().emptyUrlListCache();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mRecyclerView.removeAllViewsInLayout();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
+        // Create the AlertDialog object and return it
+        builder.create().show();
+
+    }
 }
 
