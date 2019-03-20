@@ -6,7 +6,7 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 import android.util.Log;
 
-@Database(entities = {MovieData.class, FavoriteMovies.class, UrlMovieList.class, MovieReviews.class}, version = 6, exportSchema = false)
+@Database(entities = {MovieData.class, FavoriteMovies.class, UrlMovieList.class}, version = 9, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static final String LOG_TAG = AppDatabase.class.getSimpleName();
@@ -29,8 +29,6 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     public abstract MovieDao MovieDao();
-
-    public abstract ReviewsDao ReviewsDao();
 
     public abstract FavoritesDao FavoritesDao();
 

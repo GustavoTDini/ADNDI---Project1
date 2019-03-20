@@ -1,14 +1,10 @@
 package com.example.android.project0_adndi.ProjectUtilities;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.example.android.project0_adndi.DataUtilities.AppDatabase;
-import com.example.android.project0_adndi.DataUtilities.FavoriteMovies;
 import com.example.android.project0_adndi.DataUtilities.MovieData;
 import com.example.android.project0_adndi.DataUtilities.MovieReviews;
 import com.example.android.project0_adndi.DataUtilities.MovieVideos;
@@ -28,11 +24,6 @@ public final class MovieDBUtilities {
     public static final int POSTER_INT = 301;
     // Código do BackDrop
     public static final int BACKDROP_INT = 302;
-    private static final String YOUTUBE_BASE_IMG = "http://img.youtube.com/vi/";
-    private static final String YOUTUBE_IMG = "/0.jpg";
-    private static final String YOUTUBE_PATH = "https://www.youtube.com/watch?v=";
-    private static final String YOUTUBE_APP_PATH = "vnd.youtube:";
-
 
     //  TAG desta Classe - para os erros
     private static final String LOG_TAG = MovieDBUtilities.class.getSimpleName();
@@ -60,8 +51,6 @@ public final class MovieDBUtilities {
 
         }
     };
-    // Iniciação da DataBase
-    private static AppDatabase mDb;
 
     /**
      * getFinalImageUrl é utilizado para criar o URL da imagem do poster ou fundo
@@ -91,42 +80,6 @@ public final class MovieDBUtilities {
 
         return finalImageUrl;
     }
-
-    //    /**
-    //     * getFinalImageUrl é utilizado para criar o URL da imagem do poster ou fundo
-    //     *
-    //     * @param imageUrlString parte da URL recebido pela MOVIEDB JSON
-    //     * @return a String com a URL da Imagem
-    //     */
-    //    private static void saveImageToInternal(String imageUrlString, Context context, int poster_Backdrop) {
-    //
-    //        ContextWrapper cw = new ContextWrapper(context);
-    //
-    //        String directoryName = "movieImageDir";
-    //
-    //        File directory = cw.getDir(directoryName, Context.MODE_PRIVATE);
-    //
-    //        // Create imageDir
-    //        File myPath = new File(directory, imageUrlString);
-    //
-    //        try {
-    //            Uri imageUri = Uri.parse(getFinalImageUrl(imageUrlString, poster_Backdrop));
-    //            try {
-    //                Bitmap movieImage = Downloader.Response
-    //            } catch (Exception e) {
-    //                e.printStackTrace();
-    //            }
-    //            Downloader.Response
-    //            DownloadManager.Request request = new DownloadManager.Request(imageUri).setDestinationInExternalFilesDir(context, directoryName, imageUrlString);
-    //            DownloadManager downloadManager= (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-    //            downloadID = downloadManager.enqueue(request);// enqueue puts the download request in the queue.
-    //
-    //            Log.d(LOG_TAG, "saveImageToInternal: " + fos);
-    //            fos.close();
-    //        } catch (Exception e) {
-    //            e.printStackTrace();
-    //        }
-    //    }
 
     /**
      * getScoreColor define a cor da View da pontuação do Filme
@@ -191,6 +144,29 @@ public final class MovieDBUtilities {
     }
 
     /**
+     * extractTotalPages retorna o total de paginas da lista de filmes
+     * do JSON
+     *
+     * @param JsonString JSOn com os dados brutos dos filmes
+     */
+    public static int extractTotalPages(String JsonString) {
+
+        int page = 1;
+        if (TextUtils.isEmpty(JsonString)) {
+            return page;
+        }
+
+        try {
+            JSONObject root = new JSONObject(JsonString);
+            page = root.getInt("total_pages");
+
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Problem parsing the MovieDB JSON results", e);
+        }
+        return page;
+    }
+
+    /**
      * getMovieDataFromJson decodifica o filme do JSON em uma lista de MovieData, de modo
      * que podemos recuperar esses dados em outras partes do App
      *
@@ -232,165 +208,11 @@ public final class MovieDBUtilities {
             }
 
         } catch (JSONException e) {
-            Log.e(LOG_TAG, "Problem parsing the news JSON results", e);
+            Log.e(LOG_TAG, "Problem parsing the MovieDB JSON results", e);
         }
 
         return movieList;
 
-    }
-
-    /**
-     * extractTotalPages retorna o total de paginas da lista de filmes
-     * do JSON
-     *
-     * @param JsonString JSOn com os dados brutos dos filmes
-     */
-    public static int extractTotalPages(String JsonString) {
-
-        int page = 1;
-        if (TextUtils.isEmpty(JsonString)) {
-            return page;
-        }
-
-        try {
-            JSONObject root = new JSONObject(JsonString);
-            page = root.getInt("total_pages");
-
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, "Problem parsing the news JSON results", e);
-        }
-        return page;
-    }
-
-    /**
-     * extractPAge retorna a pagina atual da lista de filmes
-     * do JSON
-     *
-     * @param JsonArray JSOn com os dados brutos dos filmes
-     */
-    public static List<MovieData> getFilmListArrayFromDb(String JsonArray, Context context) {
-
-        mDb = AppDatabase.getInstance(context);
-
-        final List<MovieData> movieList = new ArrayList<>();
-
-        if (TextUtils.isEmpty(JsonArray)) {
-            return null;
-        }
-
-        try {
-            JSONArray movieIdList = new JSONArray(JsonArray);
-            for (int JsonArrayIndex = 0; JsonArrayIndex < movieIdList.length(); JsonArrayIndex++) {
-
-                final int movieId = movieIdList.optInt(JsonArrayIndex);
-
-                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        MovieData movieData = mDb.MovieDao().loadMovieById(movieId);
-                        movieList.add(movieData);
-                    }
-                });
-
-            }
-
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, "Problem parsing the news JSON results", e);
-        }
-        return movieList;
-    }
-
-    /**
-     * createMovieListFromUrl retorna ou o total de paginas ou a pagina atual da lista de filmes
-     * do JSON
-     *
-     * @param JsonString JSOn com os dados brutos dos filmes
-     *
-     * @param requestUrl url original da busca
-     */
-    public static void createMovieListFromUrl(String JsonString, final String requestUrl, Context context) {
-
-        JSONArray movieList = new JSONArray();
-
-        mDb = AppDatabase.getInstance(context);
-
-        if (TextUtils.isEmpty(JsonString)) {
-            return;
-        }
-
-        try {
-
-            JSONObject root = new JSONObject(JsonString);
-
-            int totalPages = root.getInt("total_pages");
-
-            final int page = root.getInt("page");
-
-            JSONArray resultsJson = root.getJSONArray("results");
-
-            for (int resultsIndex = 0; resultsIndex < resultsJson.length(); resultsIndex++) {
-
-                JSONObject thisMovie = resultsJson.getJSONObject(resultsIndex);
-
-                int movieId = thisMovie.optInt("id");
-
-                movieList.put(movieId);
-            }
-
-            final String movieListString = movieList.toString();
-
-            final UrlMovieList urlList = new UrlMovieList(requestUrl, page, totalPages, movieListString);
-
-            Log.d(LOG_TAG, "createMovieListFromUrl: " + urlList.toString());
-
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    if (mDb.UrlDao().checkIfRequestExists(requestUrl, page)) {
-                        mDb.UrlDao().updateUrlInfo(urlList);
-                    } else {
-                        mDb.UrlDao().addUrlInfo(urlList);
-                    }
-                }
-            });
-
-        } catch (JSONException e) {
-            Log.e( LOG_TAG, "Problem parsing the news JSON results", e );
-        }
-
-    }
-
-    /**
-     * createMovieListFromUrl retorna ou o total de paginas ou a pagina atual da lista de filmes
-     * do JSON
-     *
-     * @param movieList JSOn com os dados brutos dos filmes
-     *
-     * @param context url original da busca
-     */
-    public static void saveMoviesDataToDB(List<MovieData> movieList, Context context) {
-
-        mDb = AppDatabase.getInstance(context);
-        if (movieList != null) {
-            for (int listIndex = 0; listIndex < movieList.size(); listIndex++) {
-
-                final MovieData movieToAdd = movieList.get(listIndex);
-
-                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mDb.MovieDao().checkIfMovieExists(movieToAdd.getMovieId())) {
-                            mDb.MovieDao().updateMovie(movieToAdd);
-                        } else {
-                            mDb.MovieDao().addMovie(movieToAdd);
-                        }
-                    }
-                });
-//
-//            saveImageToInternal(movieToAdd.getMovieBackdropUrl(), context);
-//            saveImageToInternal(movieToAdd.getMoviePosterUrl(), context);
-            }
-        }
     }
 
     /**
@@ -430,42 +252,10 @@ public final class MovieDBUtilities {
             }
 
         } catch (JSONException e) {
-            Log.e(LOG_TAG, "Problem parsing the news JSON results", e);
+            Log.e(LOG_TAG, "Problem parsing the MovieDB reviews JSON results", e);
         }
 
         return reviewsList;
-
-    }
-
-    /**
-     * createMovieListFromUrl retorna ou o total de paginas ou a pagina atual da lista de filmes
-     * do JSON
-     *
-     * @param reviewsList JSOn com os dados brutos dos filmes
-     * @param context     url original da busca
-     */
-    public static void saveReviewsDataToDB(List<MovieReviews> reviewsList, Context context) {
-
-        mDb = AppDatabase.getInstance(context);
-
-        for (int listIndex = 0; listIndex < reviewsList.size(); listIndex++) {
-
-            final MovieReviews reviewsToAdd = reviewsList.get(listIndex);
-
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    if (mDb.ReviewsDao().checkIfReviewsExists(reviewsToAdd.getMovieId(), reviewsToAdd.getReviewAuthor())) {
-                        mDb.ReviewsDao().updateReviewsInfo(reviewsToAdd);
-                    } else {
-                        mDb.ReviewsDao().addReviewsData(reviewsToAdd);
-                    }
-                }
-            });
-//
-//            saveImageToInternal(movieToAdd.getMovieBackdropUrl(), context);
-//            saveImageToInternal(movieToAdd.getMoviePosterUrl(), context);
-        }
 
     }
 
@@ -508,7 +298,7 @@ public final class MovieDBUtilities {
             }
 
         } catch (JSONException e) {
-            Log.e(LOG_TAG, "Problem parsing the JSON results", e);
+            Log.e(LOG_TAG, "Problem parsing the MovieDB Videos JSON results", e);
         }
 
         return videosList;
@@ -516,87 +306,54 @@ public final class MovieDBUtilities {
     }
 
     /**
-     * extractPAge retorna a pagina atual da lista de filmes
-     * do JSON
+     * getMovieDataFromJson decodifica o filme do JSON em uma lista de MovieData, de modo
+     * que podemos recuperar esses dados em outras partes do App
      *
-     * @param context contexto atual
+     * @param JsonString JSOn com os dados brutos dos filmes
      */
-    public static List<MovieData> getFilmListArrayFromFavorites(Context context) {
+    public static UrlMovieList getUrlMovieListFromJson(String JsonString, String requestUrl) {
 
-        mDb = AppDatabase.getInstance(context);
+        JSONArray movieList = new JSONArray();
 
-        final List<MovieData> movieList = new ArrayList<>();
+        UrlMovieList urlList = null;
 
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                List<FavoriteMovies> favoriteMoviesList = mDb.FavoritesDao().loadFavorites();
-                Log.d(LOG_TAG, "run: " + favoriteMoviesList.toString());
-                if (favoriteMoviesList != null) {
-                    for (int listIndex = 0; listIndex < favoriteMoviesList.size(); listIndex++) {
-                        final int movieId = favoriteMoviesList.get(listIndex).getMovieId();
-                        MovieData movieData = mDb.MovieDao().loadMovieById(movieId);
-                        movieList.add(movieData);
-                    }
-                }
-            }
-        });
-
-        return movieList;
-    }
-
-    public static String getYoutubeThumbnailPath(String videoKey) {
-        return YOUTUBE_BASE_IMG + videoKey + YOUTUBE_IMG;
-    }
-
-    public static Uri getYoutubeVideoPath(String videoKey, Boolean openApp) {
-        if (openApp) return Uri.parse(YOUTUBE_APP_PATH + videoKey);
-        else return Uri.parse(YOUTUBE_PATH + videoKey);
-    }
-
-    public static List<MovieData> getMovieDataFromDB(final String JsonString, final int page, final Context context) {
-
-        mDb = AppDatabase.getInstance(context);
-
-        final List<MovieData> movieList = new ArrayList<>();
-
-        if (JsonString != null) {
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    UrlMovieList movieListUrl = mDb.UrlDao().loadMovieUrlList(JsonString, page);
-                    if (movieListUrl != null) {
-                        String JsonListString = movieListUrl.getMoviesList();
-                        final List<MovieData> movieListData = MovieDBUtilities.getFilmListArrayFromDb(JsonListString, context);
-                        if (movieListData != null) {
-                            movieList.addAll(movieListData);
-                        }
-                    }
-                }
-            });
+        if (TextUtils.isEmpty(JsonString)) {
+            return null;
         }
-        return movieList;
-    }
 
-    public static Boolean checkIfMovieIsFavorite(final int movieId, Context context) {
+        try {
 
-        // Criei está variável como uma array para poder modificar o valor mesmo sendo final
-        final Boolean[] isMovieFavorite = {false};
+            JSONObject root = new JSONObject(JsonString);
 
-        mDb = AppDatabase.getInstance(context);
+            int totalPages = root.getInt("total_pages");
 
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                isMovieFavorite[0] = mDb.FavoritesDao().checkIfIsFavorite(movieId);
+            final int page = root.getInt("page");
+
+            JSONArray resultsJson = root.getJSONArray("results");
+
+            for (int resultsIndex = 0; resultsIndex < resultsJson.length(); resultsIndex++) {
+
+                JSONObject thisMovie = resultsJson.getJSONObject(resultsIndex);
+
+                int movieId = thisMovie.optInt("id");
+
+                movieList.put(movieId);
             }
-        });
 
-        Log.d(LOG_TAG, "checkIfMovieIsFavorite:" + isMovieFavorite[0]);
+            final String movieListString = movieList.toString();
+
+            urlList = new UrlMovieList(requestUrl, page, totalPages, movieListString);
 
 
-        return isMovieFavorite[0];
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Problem parsing the MoviesDB JSON results", e);
+        }
 
+        return urlList;
     }
+
+
+
+
 
 }

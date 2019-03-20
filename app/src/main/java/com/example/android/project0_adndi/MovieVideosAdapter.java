@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.project0_adndi.DataUtilities.MovieVideos;
-import com.example.android.project0_adndi.ProjectUtilities.MovieDBUtilities;
+import com.example.android.project0_adndi.ProjectUtilities.NetworkUtilities;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -69,7 +69,7 @@ public class MovieVideosAdapter extends RecyclerView.Adapter<MovieVideosAdapter.
         viewHolder.mVideoTitleTextView.setText(videoTitle);
         ImageView thumbnailImageView = viewHolder.mVideoThumbnailImageView;
 
-        Picasso.with(context).load(MovieDBUtilities.getYoutubeThumbnailPath(videoKey)).into(thumbnailImageView);
+        Picasso.with(context).load(NetworkUtilities.getYoutubeThumbnailPath(videoKey)).into(thumbnailImageView);
 
     }
 

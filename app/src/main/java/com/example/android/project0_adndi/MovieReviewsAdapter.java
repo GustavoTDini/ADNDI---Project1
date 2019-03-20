@@ -28,7 +28,7 @@ public class MovieReviewsAdapter extends RecyclerView.Adapter<MovieReviewsAdapte
     }
 
     /**
-     * onCreateViewHolder, cria os varios viewHolders que irão
+     * onCreateViewHolder, cria os varios viewHolders que irão ser inflados
      *
      * @param viewGroup o ViewGroup que contem esta viewHolder
      * @param i         tipo do view utilizado, neste caso não é utilizado, pois só temos 1 tipo de view
@@ -45,10 +45,10 @@ public class MovieReviewsAdapter extends RecyclerView.Adapter<MovieReviewsAdapte
     }
 
     /**
-     * onBindViewHolder, povoa os MovieViewHolder com as Informações do MovieData
+     * onBindViewHolder, povoa os ReviewsViewHolder com as Informações dos Reviews
      *
      * @param viewHolder viewHolder a ser povoado, neste caso um MovieViewHOlder
-     * @param position   posição do MovieData da list
+     * @param position   posição do MovieRevies da list
      */
     @Override
     public void onBindViewHolder(@NonNull ReviewsViewHolder viewHolder, int position) {
@@ -69,7 +69,6 @@ public class MovieReviewsAdapter extends RecyclerView.Adapter<MovieReviewsAdapte
         if (null == mMovieReviews) return 0;
         return mMovieReviews.size();
     }
-
 
     /**
      * Classe de viewHolder para definirmos os views a serem utilizados

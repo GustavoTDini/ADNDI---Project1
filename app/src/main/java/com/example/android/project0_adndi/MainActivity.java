@@ -23,7 +23,9 @@ import android.widget.TextView;
 import com.example.android.project0_adndi.DataUtilities.AppDatabase;
 import com.example.android.project0_adndi.DataUtilities.FavoriteMovies;
 import com.example.android.project0_adndi.DataUtilities.MovieData;
+import com.example.android.project0_adndi.DataUtilities.UrlMovieList;
 import com.example.android.project0_adndi.ProjectUtilities.AppExecutors;
+import com.example.android.project0_adndi.ProjectUtilities.DataBaseUtilities;
 import com.example.android.project0_adndi.ProjectUtilities.MovieDBUtilities;
 import com.example.android.project0_adndi.ProjectUtilities.NetworkUtilities;
 
@@ -59,8 +61,6 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
     String currentJson;
 
     List<MovieData> movieDataList;
-
-    List<FavoriteMovies> favoriteList;
 
     // string com o query para a SEARCH
     String query = "";
@@ -131,26 +131,6 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
 
     }
 
-    /**
-     * Metodo que override o onclick da View para abrirmos uma intent de
-     * DetailsActivity e passarmos os dados de movie
-     *
-     * @param movie MovieData a ser passada para outra intent
-     */
-    @Override
-    public void onClick(MovieData movie) {
-        Context context = this;
-        Class destinationClass = DetailsActivity.class;
-        Intent detailsIntent = new Intent(context, destinationClass);
-        detailsIntent.putExtra( MovieData.MOVIE_PARCEL, Parcels.wrap( movie ) );
-        startActivity(detailsIntent);
-    }
-
-    /**
-     * Metodo para a criação do Menu
-     *
-     * @param menu menu a ser criado
-     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -179,14 +159,10 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         return true;
     }
 
-    /**
-     * Metodo para definirmos o que acontece com cada seleção do menu
-     *
-     * @param item item do menu selecionado
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        currentPage = 1;
 
         switch (id) {
             case R.id.action_popular:
@@ -202,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
                 testConnectionGetAndSaveData(NetworkUtilities.NOW_PLAYING);
                 return true;
             case R.id.action_favorites:
-                getAndShowFavorites();
+                showFilmFavoritesList();
                 return true;
             case R.id.action_empty_cache:
                 deleteAllCache();
@@ -210,6 +186,21 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Metodo que override o onclick da View para abrirmos uma intent de
+     * DetailsActivity e passarmos os dados de movie
+     *
+     * @param movie MovieData a ser passada para outra intent
+     */
+    @Override
+    public void onClick(MovieData movie) {
+        Context context = this;
+        Class destinationClass = DetailsActivity.class;
+        Intent detailsIntent = new Intent(context, destinationClass);
+        detailsIntent.putExtra(MovieData.MOVIE_PARCEL, Parcels.wrap(movie));
+        startActivity(detailsIntent);
     }
 
     /**
@@ -258,6 +249,8 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
 
     /**
      * showHideButtons Método para definir a visibilidade dos botões de controle de paginas
+     *
+     * @param pages pagina atual da busca
      */
     private void showHideButtons(int pages) {
         mAddPagesButton.setVisibility(View.VISIBLE);
@@ -279,6 +272,8 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         Log.d(TAG, "populateGridAdapter: " + movieList);
         if (movieList != null) {
             if (movieList.size() > 0) {
+                mProgressBar.setVisibility(View.VISIBLE);
+                mRecyclerView.removeAllViewsInLayout();
                 MovieGridAdapter mMovieGridAdapter = new MovieGridAdapter(MainActivity.this);
                 mMovieGridAdapter.setMovieData(movieList);
                 mRecyclerView.setAdapter(mMovieGridAdapter);
@@ -289,15 +284,23 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         } else showViews(true, "An error has occurred. Please try again");
     }
 
-
+    /**
+     * testConnectionGetAndSaveData - Principal método desta view, define a Url a realizar a busca,
+     * testa se há conexão, em caso positivo, carrega todos os filmes da busca, os grava no DB, e salva
+     * o Array com os filmes em URLMovieList em caso negativo, testa se já existe essa URl e paginas salvas, se estiver, as mostra,
+     * caso contrario, mostra a mensagem de que não ha conexão
+     *
+     * @param type String com o tipo da busca da ser realizada
+     */
     private void testConnectionGetAndSaveData(String type) {
         Boolean connected = NetworkUtilities.testConnection(getApplicationContext());
-        Log.d(TAG, "testConnectionGetAndSaveData: " + connected);
+        mRecyclerView.removeAllViewsInLayout();
+        mProgressBar.setVisibility(View.VISIBLE);
+        mErrorMessageDisplay.setVisibility(View.GONE);
+        selectedType = type;
+        currentUrl = NetworkUtilities.createCurrentUrl(type, currentPage, query);
 
         if (connected) {
-            mProgressBar.setVisibility(View.VISIBLE);
-            mRecyclerView.removeAllViewsInLayout();
-            currentUrl = NetworkUtilities.createCurrentUrl(type, currentPage, query);
             AppExecutors.getInstance().networkIO().execute(new Runnable() {
                 @Override
                 public void run() {
@@ -311,51 +314,48 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Log.d(TAG, "run: " + movieDataList);
                             populateGridAdapter(movieDataList);
-                            MovieDBUtilities.saveMoviesDataToDB(movieDataList, getApplicationContext());
                             mProgressBar.setVisibility(View.INVISIBLE);
                         }
                     });
                 }
             });
-            MovieDBUtilities.createMovieListFromUrl(currentJson, String.valueOf(currentPage), getApplicationContext());
-        } else if (checkIfDataExistsInDB(currentJson, currentPage)) {
-            movieDataList = MovieDBUtilities.getMovieDataFromDB(currentJson, currentPage, getApplicationContext());
-            if (movieDataList != null) {
-                populateGridAdapter(movieDataList);
-            }
-        } else {
-            showViews(true, "There´s no Internet Connection!!");
-        }
-    }
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    DataBaseUtilities.saveMoviesDataToDB(movieDataList, getApplicationContext());
+                    DataBaseUtilities.createMovieListFromUrl(currentJson, currentUrl.toString(), getApplicationContext());
+                }
+            });
 
-    private void getAndShowFavorites() {
-        mDb = AppDatabase.getInstance(getApplicationContext());
-        mProgressBar.setVisibility(View.VISIBLE);
-        mRecyclerView.removeAllViewsInLayout();
-        movieDataList = MovieDBUtilities.getFilmListArrayFromFavorites(getApplicationContext());
-        if (movieDataList != null) {
-            populateGridAdapter(movieDataList);
-        }
-    }
-
-    private boolean checkIfDataExistsInDB(final String JsonString, final int page) {
-
-        // Criei está variável como uma array para poder modificar o valor mesmo sendo final
-        final Boolean[] isDataInDbBoolean = {false};
-
-        mDb = AppDatabase.getInstance(getApplicationContext());
-
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+        } else AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                isDataInDbBoolean[0] = mDb.UrlDao().checkIfRequestExists(JsonString, page);
+                if (DataBaseUtilities.checkIfUrlExists(currentUrl.toString(), currentPage, getApplicationContext())) {
+                    movieDataList = DataBaseUtilities.getMovieDataFromDB(currentUrl.toString(), currentPage, getApplicationContext());
+                    Log.d(TAG, "run: " + movieDataList);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (movieDataList != null) populateGridAdapter(movieDataList);
+                        }
+                    });
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showViews(true, "There´s no Internet Connection!!");
+                        }
+                    });
+                }
             }
         });
-        return isDataInDbBoolean[0];
     }
 
+    /**
+     * deleteAllCache Método que apaga todos os dados, devido a ser uma exceção, para confirmae se o usuario realmente
+     * quer fazer isso, é aberto um dialogo para confirmar
+     */
     private void deleteAllCache() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Confirm Data Exclusion")
@@ -367,7 +367,6 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
                             public void run() {
                                 mDb.FavoritesDao().emptyFavorites();
                                 mDb.MovieDao().emptyMovieCache();
-                                mDb.ReviewsDao().emptyReviewsCache();
                                 mDb.UrlDao().emptyUrlListCache();
                                 runOnUiThread(new Runnable() {
                                     @Override
@@ -386,6 +385,52 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         // Create the AlertDialog object and return it
         builder.create().show();
 
+    }
+
+    /**
+     * showFilmFavoritesList - método que carrega a lista de favoritos a mostra no recyclerView
+     */
+    private void showFilmFavoritesList() {
+
+        mDb = AppDatabase.getInstance(getApplicationContext());
+        mErrorMessageDisplay.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.VISIBLE);
+        mRecyclerView.removeAllViewsInLayout();
+
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                final List<MovieData> favoritesMovieList = DataBaseUtilities.getMovieFavoritesList(getApplicationContext());
+                Log.d(TAG, "getFilmListArrayFromFavorites: " + favoritesMovieList);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        populateGridAdapter(favoritesMovieList);
+                        mAddPagesButton.setVisibility(View.GONE);
+                        mDecreasePagesButton.setVisibility(View.GONE);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * showDataBase - método utilizado para debug que mostra todos os bancos de dados
+     */
+    private void showDataBase() {
+        mDb = AppDatabase.getInstance(getApplicationContext());
+
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                List<FavoriteMovies> favoritesMovieList = mDb.FavoritesDao().loadFavorites();
+                List<MovieData> MovieList = mDb.MovieDao().loadMovies();
+                List<UrlMovieList> UrlList = mDb.UrlDao().loadUrlList();
+                Log.d(TAG, "showDataBase: Movies - " + MovieList.toString());
+                Log.d(TAG, "showDataBase: Favorites - " + favoritesMovieList.toString());
+                Log.d(TAG, "showDataBase: URl - " + UrlList.toString());
+            }
+        });
     }
 }
 

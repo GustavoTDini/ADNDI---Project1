@@ -64,6 +64,11 @@ public final class NetworkUtilities {
     private final static String LANGUAGE_PARAM = "language";
     private final static String ADULT_PARAM = "include_adult";
 
+    private static final String YOUTUBE_BASE_IMG = "http://img.youtube.com/vi/";
+    private static final String YOUTUBE_IMG = "/0.jpg";
+    private static final String YOUTUBE_PATH = "https://www.youtube.com/watch?v=";
+    private static final String YOUTUBE_APP_PATH = "vnd.youtube:";
+
     /**
      * buildMovieSearchURL é chamado para criarmos a URL do MovieDB, de acordo com as opções do Usuario
      *
@@ -266,6 +271,27 @@ public final class NetworkUtilities {
         Boolean connected = (networkInfo != null && networkInfo.isConnected());
         Log.d(TAG, "testConnection: " + connected);
         return connected;
+    }
+
+    /**
+     * getYoutubeThumbnailPath Metodo que cria a url da imagem de amostra do video do Youtube
+     *
+     * @param videoKey chave de busca do video do Youtube
+     * @return String com a URl
+     */
+    public static String getYoutubeThumbnailPath(String videoKey) {
+        return YOUTUBE_BASE_IMG + videoKey + YOUTUBE_IMG;
+    }
+
+    /**
+     * getYoutubeVideoPath Metodo que cria a url do video do Youtube
+     *
+     * @param videoKey chave de busca do video do Youtube
+     * @return Uri formada
+     */
+    public static Uri getYoutubeVideoPath(String videoKey, Boolean openApp) {
+        if (openApp) return Uri.parse(YOUTUBE_APP_PATH + videoKey);
+        else return Uri.parse(YOUTUBE_PATH + videoKey);
     }
 
 

@@ -68,21 +68,24 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder viewHolder, int position) {
         Context thisContext = this.context;
-        String movieTitle = mMovieList.get( position ).getMovieName();
-        String movieRanking = mMovieList.get( position ).getMovieRanking();
-        String moviePosterUrl = mMovieList.get(position).getMoviePosterUrl();
+        if (mMovieList.get(position) != null) {
+            String movieTitle = mMovieList.get(position).getMovieName();
+            String movieRanking = mMovieList.get(position).getMovieRanking();
+            String moviePosterUrl = mMovieList.get(position).getMoviePosterUrl();
 
-        viewHolder.mMovieTitleTextView.setText(movieTitle);
-        viewHolder.mMovieRankingTextView.setText(movieRanking);
-        int colorInt = MovieDBUtilities.getScoreColor(Integer.parseInt(movieRanking));
-        int colorId = ContextCompat.getColor(thisContext, colorInt);
-        viewHolder.mMovieRankingTextView.getBackground().setColorFilter(colorId, PorterDuff.Mode.SRC_ATOP);
+            viewHolder.mMovieTitleTextView.setText(movieTitle);
+            viewHolder.mMovieRankingTextView.setText(movieRanking);
+            int colorInt = MovieDBUtilities.getScoreColor(Integer.parseInt(movieRanking));
+            int colorId = ContextCompat.getColor(thisContext, colorInt);
+            viewHolder.mMovieRankingTextView.getBackground().setColorFilter(colorId, PorterDuff.Mode.SRC_ATOP);
 
-        Log.v(TAG, String.valueOf(colorInt));
+            Log.v(TAG, String.valueOf(colorInt));
 
-        ImageView posterImageView = viewHolder.mMoviePosterImageView;
+            ImageView posterImageView = viewHolder.mMoviePosterImageView;
 
-        Picasso.with(context).load(MovieDBUtilities.getFinalImageUrl(moviePosterUrl, MovieDBUtilities.POSTER_INT)).into(posterImageView);
+            Picasso.with(context).load(MovieDBUtilities.getFinalImageUrl(moviePosterUrl, MovieDBUtilities.POSTER_INT)).into(posterImageView);
+        }
+
 
     }
 
