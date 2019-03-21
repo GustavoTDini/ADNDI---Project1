@@ -3,6 +3,7 @@ package com.example.android.project0_adndi;
 import android.app.AlertDialog;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -27,6 +28,7 @@ import com.example.android.project0_adndi.DataUtilities.AppDatabase;
 import com.example.android.project0_adndi.DataUtilities.FavoriteMovies;
 import com.example.android.project0_adndi.DataUtilities.MovieData;
 import com.example.android.project0_adndi.DataUtilities.UrlMovieList;
+import com.example.android.project0_adndi.MovieViewModel.MovieViewModel;
 import com.example.android.project0_adndi.ProjectUtilities.AppExecutors;
 import com.example.android.project0_adndi.ProjectUtilities.DataBaseUtilities;
 import com.example.android.project0_adndi.ProjectUtilities.MovieDBUtilities;
@@ -144,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
             currentPage = 1;
         }
 
-        observeFavorites();
+        observeViewModelFavorites();
 
         if (!selectedType.equals(FAVORITES)) {
             testConnectionGetAndSaveData(selectedType);
@@ -434,22 +436,18 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
     }
 
     /**
-     * observeFavorites - método que atualiza o favorites atraves do Livedata e veificando se o query atual é de favoritos, atualiza a
+     * observeViewModelFavorites - método que atualiza o favorites atraves do Livedata e veificando se o query atual é de favoritos, atualiza a
      */
-    private void observeFavorites() {
+    private void observeViewModelFavorites() {
 
-        mDb = AppDatabase.getInstance(getApplicationContext());
-
-        final LiveData<List<MovieData>> favoriteList = mDb.MovieDao().loadFavoriteMovies();
-
-        favoriteList.observe(this, new Observer<List<MovieData>>() {
+        MovieViewModel viewModel = ViewModelProviders.of(this).get(MovieViewModel.class);
+        viewModel.getFavoritesList().observe(this, new Observer<List<MovieData>>() {
             @Override
-            public void onChanged(@Nullable List<MovieData> movieData) {
-                favoritesList = movieData;
+            public void onChanged(@Nullable List<MovieData> favoriteMovies) {
+                favoritesList = favoriteMovies;
                 if (selectedType.equals(FAVORITES)) {
                     showFilmFavoritesList();
                 }
-                Log.d(TAG, "onChanged: " + movieData);
             }
         });
 
