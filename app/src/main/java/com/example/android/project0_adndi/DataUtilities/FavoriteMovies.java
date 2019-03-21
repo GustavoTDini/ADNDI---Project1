@@ -4,13 +4,14 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
 @Entity(tableName = "favorites")
 @ForeignKey(entity = MovieData.class, parentColumns = "movie_id", childColumns = "movie_id")
 public class FavoriteMovies {
 
     @PrimaryKey
-    @ColumnInfo(name = "movie_id")
+    @ColumnInfo(name = "favorite_movie_id")
     private int mMovieId;
     @ColumnInfo(name = "favorite")
     private Boolean isMovieFavorite;
@@ -36,6 +37,7 @@ public class FavoriteMovies {
         isMovieFavorite = movieFavorite;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "FavoriteMovies{" +

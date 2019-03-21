@@ -21,11 +21,11 @@ public interface FavoritesDao {
     void emptyFavorites();
 
     @Query("SELECT * FROM favorites WHERE favorite = 1")
-    List<FavoriteMovies> loadFavorites();
+    LiveData<List<FavoriteMovies>> loadFavorites();
 
-    @Query("SELECT * FROM favorites WHERE movie_id = :movieId")
+    @Query("SELECT * FROM favorites WHERE favorite_movie_id = :movieId")
     LiveData<FavoriteMovies> loadFavoriteById(int movieId);
 
-    @Query("SELECT EXISTS(SELECT 1 FROM favorites WHERE movie_id = :movieId)")
+    @Query("SELECT EXISTS(SELECT 1 FROM favorites WHERE favorite_movie_id = :movieId)")
     Boolean checkIfFavoriteExists(int movieId);
 }

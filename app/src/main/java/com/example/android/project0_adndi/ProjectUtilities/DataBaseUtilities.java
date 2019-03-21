@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.android.project0_adndi.DataUtilities.AppDatabase;
-import com.example.android.project0_adndi.DataUtilities.FavoriteMovies;
 import com.example.android.project0_adndi.DataUtilities.MovieData;
 import com.example.android.project0_adndi.DataUtilities.UrlMovieList;
 
@@ -98,29 +97,6 @@ public class DataBaseUtilities {
             if (movieListUrl != null) {
                 String JsonListString = movieListUrl.getMoviesList();
                 movieList = getFilmListArrayFromDbJson(JsonListString, context);
-            }
-        }
-        return movieList;
-    }
-
-    /**
-     * getMovieDataFromDB cria uma lista de MovieData a partir da DB de favoritos
-     * do JSON
-     *
-     * @param context o contexto atual para ser passado para mDb
-     */
-    public static List<MovieData> getMovieFavoritesList(Context context) {
-
-        mDb = AppDatabase.getInstance(context);
-
-        final List<MovieData> movieList = new ArrayList<>();
-
-        final List<FavoriteMovies> favoriteList = mDb.FavoritesDao().loadFavorites();
-
-        if (favoriteList != null) {
-            for (int listIndex = 0; listIndex < favoriteList.size(); listIndex++) {
-                MovieData favoriteMovie = mDb.MovieDao().loadMovieById(favoriteList.get(listIndex).getMovieId());
-                movieList.add(favoriteMovie);
             }
         }
         return movieList;

@@ -1,11 +1,14 @@
 package com.example.android.project0_adndi;
 
 import android.app.AlertDialog;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -46,6 +49,11 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
     // int com o total de View do grid em Modo retrato
     private static final int PORTRAIT_SPAM = 2;
 
+    private static final String SAVED_TYPE = "selected_type";
+    private static final String SAVED_PAGE = "selected_page";
+
+    private static final String FAVORITES = "0110";
+
     // int com o numero de paginas atual
     int currentPage = 1;
 
@@ -62,11 +70,13 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
 
     List<MovieData> movieDataList;
 
+    List<MovieData> favoritesList;
+
     // string com o query para a SEARCH
     String query = "";
 
-    // string com o tipo selecionado - iniciado com POPULAR
-    String selectedType = NetworkUtilities.POPULAR;
+    // string com o tipo selecionado
+    String selectedType;
 
     private RecyclerView mRecyclerView;
     private TextView mErrorMessageDisplay;
@@ -126,8 +136,22 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         GridLayoutManager layoutManager = new GridLayoutManager(this, gridSpam);
         mRecyclerView.setLayoutManager(layoutManager);
 
-        // inicia o AsynTask com um teste de concexão
-        testConnectionGetAndSaveData(selectedType);
+        if (savedInstanceState != null) {
+            selectedType = savedInstanceState.getString(SAVED_TYPE);
+            currentPage = savedInstanceState.getInt(SAVED_PAGE);
+        } else {
+            selectedType = NetworkUtilities.POPULAR;
+            currentPage = 1;
+        }
+
+        observeFavorites();
+
+        if (!selectedType.equals(FAVORITES)) {
+            testConnectionGetAndSaveData(selectedType);
+        } else {
+            showFilmFavoritesList();
+        }
+
 
     }
 
@@ -179,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
                 return true;
             case R.id.action_favorites:
                 showFilmFavoritesList();
+                selectedType = FAVORITES;
                 return true;
             case R.id.action_empty_cache:
                 deleteAllCache();
@@ -186,6 +211,13 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(SAVED_TYPE, selectedType);
+        outState.putInt(SAVED_PAGE, currentPage);
     }
 
     /**
@@ -392,26 +424,35 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
      */
     private void showFilmFavoritesList() {
 
-        mDb = AppDatabase.getInstance(getApplicationContext());
         mErrorMessageDisplay.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
         mRecyclerView.removeAllViewsInLayout();
+        populateGridAdapter(favoritesList);
+        mAddPagesButton.setVisibility(View.GONE);
+        mDecreasePagesButton.setVisibility(View.GONE);
 
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+    }
+
+    /**
+     * observeFavorites - método que atualiza o favorites atraves do Livedata e veificando se o query atual é de favoritos, atualiza a
+     */
+    private void observeFavorites() {
+
+        mDb = AppDatabase.getInstance(getApplicationContext());
+
+        final LiveData<List<MovieData>> favoriteList = mDb.MovieDao().loadFavoriteMovies();
+
+        favoriteList.observe(this, new Observer<List<MovieData>>() {
             @Override
-            public void run() {
-                final List<MovieData> favoritesMovieList = DataBaseUtilities.getMovieFavoritesList(getApplicationContext());
-                Log.d(TAG, "getFilmListArrayFromFavorites: " + favoritesMovieList);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        populateGridAdapter(favoritesMovieList);
-                        mAddPagesButton.setVisibility(View.GONE);
-                        mDecreasePagesButton.setVisibility(View.GONE);
-                    }
-                });
+            public void onChanged(@Nullable List<MovieData> movieData) {
+                favoritesList = movieData;
+                if (selectedType.equals(FAVORITES)) {
+                    showFilmFavoritesList();
+                }
+                Log.d(TAG, "onChanged: " + movieData);
             }
         });
+
     }
 
     /**
@@ -423,7 +464,7 @@ public class MainActivity extends AppCompatActivity implements MovieGridAdapter.
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                List<FavoriteMovies> favoritesMovieList = mDb.FavoritesDao().loadFavorites();
+                LiveData<List<FavoriteMovies>> favoritesMovieList = mDb.FavoritesDao().loadFavorites();
                 List<MovieData> MovieList = mDb.MovieDao().loadMovies();
                 List<UrlMovieList> UrlList = mDb.UrlDao().loadUrlList();
                 Log.d(TAG, "showDataBase: Movies - " + MovieList.toString());
